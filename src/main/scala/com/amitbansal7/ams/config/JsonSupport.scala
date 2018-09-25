@@ -4,8 +4,10 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.services.UserService
 import com.amitbansal.ams.services.UserService.AuthRes
+import com.amitbansal7.ams.models.Department
+import com.amitbansal7.ams.models.Department.Department
 import org.mongodb.scala.bson.ObjectId
-import spray.json.{DefaultJsonProtocol, JsString, JsValue, RootJsonFormat}
+import spray.json.{DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat}
 
 object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
 
@@ -15,7 +17,17 @@ object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
     override def write(obj: ObjectId): JsValue = JsString(obj.toHexString)
   }
 
+//  class EnumJsonConverter[T <: scala.Enumeration](enu: T) extends RootJsonFormat[T#Value]{
+//    override def write(obj: T#Value): JsValue = JsString(obj.toString)
+//
+//    override def read(json: JsValue): T#Value = json match {
+//      case JsString(txt) => enu.withName(txt)
+//      case somethingElse => throw DeserializationException("Error while reading Enumeration")
+//    }
+//  }
+
   implicit val userServiceResponseFormat = jsonFormat2(UserService.UserServiceResponse)
   implicit val userFormat = jsonFormat5(User.apply)
   implicit val authResFormat = jsonFormat3(AuthRes)
+//  implicit val departmentFormat = new EnumJsonConverter(Department)
 }
