@@ -19,7 +19,7 @@ lazy val root = (project in file(".")).
       "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
       "org.scalatest" %% "scalatest" % "3.0.1" % Test,
 
-      "org.mongodb.scala" %% "mongo-scala-driver" % "2.4.0",
+      "org.mongodb.scala" %% "mongo-scala-driver" % "2.4.2",
       "commons-codec" % "commons-codec" % "1.9",
 
       "com.pauldijou" %% "jwt-core" % "0.18.0"

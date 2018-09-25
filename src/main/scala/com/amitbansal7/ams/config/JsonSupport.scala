@@ -4,8 +4,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.services.UserService
 import com.amitbansal.ams.services.UserService.AuthRes
-import com.amitbansal7.ams.models.Department
-import com.amitbansal7.ams.models.Department.Department
+import com.amitbansal7.ams.services.AchievementService
 import org.mongodb.scala.bson.ObjectId
 import spray.json.{DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat}
 
@@ -27,6 +26,7 @@ object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
 //  }
 
   implicit val userServiceResponseFormat = jsonFormat2(UserService.UserServiceResponse)
+  implicit val AchievementServiceResponseFormat = jsonFormat2(AchievementService.AchievementServiceResponse)
   implicit val userFormat = jsonFormat5(User.apply)
   implicit val authResFormat = jsonFormat3(AuthRes)
 //  implicit val departmentFormat = new EnumJsonConverter(Department)

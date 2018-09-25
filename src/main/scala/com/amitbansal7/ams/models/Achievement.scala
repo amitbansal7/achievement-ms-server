@@ -1,35 +1,20 @@
 package com.amitbansal7.ams.models
 
-import com.amitbansal7.ams.models.Category.Category
-import com.amitbansal7.ams.models.Department.{Department, Unknown, values}
 import org.mongodb.scala.bson.ObjectId
 
-object Department extends Enumeration{
-  type Department = Value
-  val ComputerScience, Education, Management, Unknown = Value
-
-  def withNameWithDefault(name: String): Value =
-    values.find(_.toString.toLowerCase == name.toLowerCase()).getOrElse(Unknown)
-}
-
-object Category extends Enumeration{
-  type Category = Value
-  val Sports, technical, Cultural, Others = Value
-
-  def withNameWithDefault(name: String): Value =
-    values.find(_.toString.toLowerCase == name.toLowerCase()).getOrElse(Others)
-}
-
 object Achievement{
+
+  val departments = List("computerscience", "education", "management")
+  val categories = List("sports", "technical", "cultural", "others")
 
   def apply(
     _id: ObjectId,
     rollno: String,
-    department: Department,
+    department: String,
     year: Int,
     date: String,
     venue: String,
-    category: Category,
+    category: String,
     participated: Boolean, //coordinated if false
     rating: Int,
     name: String,
@@ -42,11 +27,11 @@ object Achievement{
 
   def apply(
     rollno: String,
-    department: Department,
+    department: String,
     year: Int,
     date: String,
     venue: String,
-    category: Category,
+    category: String,
     participated: Boolean, //coordinated if false
     name: String,
     imageUrl: String,
@@ -59,11 +44,11 @@ object Achievement{
 case class Achievement(
   _id: ObjectId,
   rollno: String,
-  department: Department,
+  department: String,
   year: Int,
   date: String,
   venue: String,
-  category: Category,
+  category: String,
   participated: Boolean, //coordinated if false
   rating: Int,
   name: String,
@@ -71,4 +56,6 @@ case class Achievement(
   approved: Boolean,
   description: String,
   eventName: String
-)
+){
+
+}
