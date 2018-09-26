@@ -6,6 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import com.amitbansal.ams.config.JsonSupport._
 import com.amitbansal.ams.models.User
 import com.amitbansal7.ams.services.AchievementService
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object AchievementRoutes {
   def route: Route = {
@@ -32,6 +33,11 @@ object AchievementRoutes {
         parameter('id) { id =>
           AchievementService.approveAch(id)
           complete(StatusCodes.OK, "approved")
+        }
+      } ~ (path("all") & get) {
+        parameter('department) { department =>
+          val f = AchievementService.getAllApproved(department.toLowerCase)
+          complete(StatusCodes.OK, f.map(r => r))
         }
       }
     }

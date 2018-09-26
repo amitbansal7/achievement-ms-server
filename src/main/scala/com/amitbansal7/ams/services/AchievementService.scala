@@ -12,6 +12,9 @@ object AchievementService {
     AchievementRepository.approve(id, true)
 
 
+  def getAllApproved(department: String) =
+    AchievementRepository.findAllApprovedByDepartment(department)
+
   def addAchievement(
     rollno: String,
     department: String,
