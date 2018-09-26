@@ -19,12 +19,10 @@ object MongoConfig {
   val mongoClient = MongoClient()
 
   val userCodecRegistry = fromRegistries(fromProviders(classOf[User]), DEFAULT_CODEC_REGISTRY)
-  val achievementCodecRegistry = fromRegistries(fromProviders(classOf[Achievement]), DEFAULT_CODEC_REGISTRY)
+  val achievementCodecRegistry = fromRegistries(fromProviders(classOf[Achievement]), userCodecRegistry)
 
   val db = mongoClient
     .getDatabase("ams")
-    .withCodecRegistry(DEFAULT_CODEC_REGISTRY)
-    .withCodecRegistry(userCodecRegistry)
     .withCodecRegistry(achievementCodecRegistry)
 
   val userCollection: MongoCollection[User] = db.getCollection(USER_COLLECTION)

@@ -2,12 +2,13 @@ package com.amitbansal.ams.services
 
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
+import com.amitbansal7.ams.services.JwtService
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
-import pdi.jwt.{Jwt, JwtAlgorithm, JwtHeader, JwtClaim, JwtOptions}
+import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtOptions}
 
 
 object UserService {
@@ -19,13 +20,10 @@ object UserService {
     user != null
   }
 
-  def getJwtToken(id: String, email: String):String =
-    Jwt.encode("""{"user":1}""", "secret", JwtAlgorithm.HS384)
-
   def authenticateUser(email: String, password: String): Future[AuthRes] = {
     UserRepository.getByEmail(email).map {
       case user: User if user.password == User.getPasshash(password) =>
-        AuthRes(true, "User is authenticated", getJwtToken(user._id.toHexString, user.email))
+        AuthRes(true, "User is authenticated", JwtService.getJwtToken(user._id.toHexString, user.email))
       case _ =>
         AuthRes(false, "User is not authenticated", "")
     }
@@ -50,6 +48,7 @@ object UserService {
   }
 
   case class UserServiceResponse(bool: Boolean, message: String)
+
   case class AuthRes(bool: Boolean, message: String, jwt: String)
 
 }

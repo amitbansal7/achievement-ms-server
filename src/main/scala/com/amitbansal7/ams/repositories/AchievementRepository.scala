@@ -23,16 +23,16 @@ object AchievementRepository {
       Document("$set" -> Document("approved" -> approved))
     ).toFuture()
 
-  def findAllByDepartment(department: String) =
+  def findAllByUnApprovedDepartment(department: String) =
     achievementCollection
       .find(
-        Document("department"->department)
+        Document("department" -> department, "approved" -> false)
       ).toFuture()
 
   def findAllApprovedByDepartment(department: String) =
     achievementCollection
       .find(
-        Document("department"->department, "approved" -> true)
+        Document("department" -> department, "approved" -> true)
       ).toFuture()
 
 }
