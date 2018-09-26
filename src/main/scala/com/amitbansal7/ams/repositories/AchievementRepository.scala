@@ -19,7 +19,7 @@ object AchievementRepository {
 
   def approve(id: String, approved: Boolean) =
     achievementCollection.updateOne(
-      Document("_id" -> id),
+      Document("_id" -> new ObjectId(id)),
       Document("$set" -> Document("approved" -> approved))
     ).toFuture()
 

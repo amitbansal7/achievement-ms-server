@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 object AchievementService {
 
   def approveAch(id: String) =
-    AchievementRepository.approve(id, true).foreach(println(_))
+    AchievementRepository.approve(id, true)
 
 
   def addAchievement(
