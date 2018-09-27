@@ -6,15 +6,17 @@ import akka.http.scaladsl.server.Directives._
 import com.amitbansal.ams.config.JsonSupport._
 import com.amitbansal.ams.models.User
 import com.amitbansal7.ams.services.AchievementService
+import com.amitbansal7.ams.services.AchievementService.AchievementServiceResponseToken
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.reflect.io.File
+import scala.util.{Failure, Success}
 
 object AchievementRoutes {
-  def route: Route = {
+  def route: Route = toStrictEntity(2 seconds){
     pathPrefix("achievements") {
-      (toStrictEntity(2 seconds) & path("add") & post) {
+      (path("add") & post) {
         formField(
           'rollno,
           'department,
@@ -45,13 +47,9 @@ object AchievementRoutes {
           val f = AchievementService.getAllApproved(department.toLowerCase)
           complete(StatusCodes.OK, f.map(r => r))
         }
-      } ~ (path("t") & post) {
-        formField('name) { name =>
-          fileUpload("image") {
-            case (meta, file) =>
-              println(file.toString() + " " + meta.toString + name)
-              complete(StatusCodes.OK)
-          }
+      } ~ (path("unapproved") & get) {
+        parameter('token) { token =>
+          complete(StatusCodes.OK, AchievementService.getAllUnapproved(token))
         }
       }
     }

@@ -2,7 +2,7 @@ package com.amitbansal7.ams.models
 
 import org.mongodb.scala.bson.ObjectId
 
-object Achievement{
+object Achievement {
 
   val departments = List("computerscience", "education", "management")
   val categories = List("sports", "technical", "cultural", "others")
@@ -56,6 +56,6 @@ case class Achievement(
   approved: Boolean,
   description: String,
   eventName: String
-){
+) {
 
 }

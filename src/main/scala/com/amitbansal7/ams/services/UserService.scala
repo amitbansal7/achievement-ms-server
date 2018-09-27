@@ -23,7 +23,7 @@ object UserService {
   def authenticateUser(email: String, password: String): Future[AuthRes] = {
     UserRepository.getByEmail(email).map {
       case user: User if user.password == User.getPasshash(password) =>
-        AuthRes(true, "User is authenticated", JwtService.getJwtToken(user._id.toHexString, user.email))
+        AuthRes(true, "User is authenticated", JwtService.getJwtToken(user.email, user.email))
       case _ =>
         AuthRes(false, "User is not authenticated", "")
     }
@@ -34,7 +34,8 @@ object UserService {
     password: String,
     firstName: String,
     lastName: String,
-    code: String):
+    code: String,
+    department: String):
   UserServiceResponse = {
     if (code != secretCode)
       return UserServiceResponse(false, s"Secret code doesn't match")
@@ -42,13 +43,13 @@ object UserService {
     if (existByEmail(email))
       return UserServiceResponse(false, s"User with email ${email} already exists")
     else {
-      UserRepository.addUser(User.apply(email, password, firstName, lastName))
+      UserRepository.addUser(User.apply(email, password, firstName, lastName, department))
       UserServiceResponse(true, "Account successfully created")
     }
   }
 
   case class UserServiceResponse(bool: Boolean, message: String)
 
-  case class AuthRes(bool: Boolean, message: String, jwt: String)
+  case class AuthRes(bool: Boolean, message: String, token: String)
 
 }

@@ -6,23 +6,42 @@ import com.amitbansal7.ams.models.Achievement
 import com.amitbansal7.ams.repositories.AchievementRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import java.io.{File, FileInputStream, InputStream}
 import java.nio.file.Files
 
 import akka.http.scaladsl.server.directives.FileInfo
+import com.amitbansal.ams.repositories.UserRepository
+import pdi.jwt.{Jwt, JwtAlgorithm}
 
-import scala.util.Random
+import scala.util.parsing.json.JSON
+import scala.util.{Failure, Random, Success}
 
 object AchievementService {
 
   def approveAch(id: String) =
     AchievementRepository.approve(id, true)
 
-
   def getAllApproved(department: String) =
     AchievementRepository.findAllApprovedByDepartment(department)
+
+  def getAllUnapproved(token: String) = {
+    JwtService.decodeToken(token) match {
+      case Success(value) =>
+        JSON.parseFull(value._2) match {
+          case Some(map: Map[String, String]) =>
+            map.get("user") match {
+              case Some(email) =>
+                UserRepository.getByEmail(email).map { u =>
+                  AchievementRepository.findAllByUnApprovedDepartment(u.department)
+                }.flatMap(identity).map(d => AchievementServiceResponseToken(true, d))
+              case None => Future(AchievementServiceResponseToken(false, List()))
+            }
+        }
+      case Failure(exception) => Future(AchievementServiceResponseToken(false, List()))
+    }
+  }
 
   def addAchievement(
     rollno: String,
@@ -66,5 +85,7 @@ object AchievementService {
   }
 
   case class AchievementServiceResponse(bool: Boolean, message: String)
+
+  case class AchievementServiceResponseToken(boo: Boolean, data: Seq[Achievement])
 
 }
