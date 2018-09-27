@@ -23,7 +23,7 @@ object UserService {
   def authenticateUser(email: String, password: String): Future[AuthRes] = {
     UserRepository.getByEmail(email).map {
       case user: User if user.password == User.getPasshash(password) =>
-        AuthRes(true, "User is authenticated", JwtService.getJwtToken(user.email, user.email))
+        AuthRes(true, "User is authenticated", JwtService.getJwtToken(user.email))
       case _ =>
         AuthRes(false, "User is not authenticated", "")
     }

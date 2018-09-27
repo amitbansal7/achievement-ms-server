@@ -8,8 +8,8 @@ object JwtService {
 
   val secretKey = "secret"
 
-  def getJwtToken(id: String, email: String): String = {
-    Jwt.encode(JwtClaim({s"""{"user":"$id"}"""}).issuedNow.expiresIn(10 * 24 * 60 * 60), secretKey, JwtAlgorithm.HS384)
+  def getJwtToken(email: String): String = {
+    Jwt.encode(JwtClaim({s"""{"user":"$email"}"""}).issuedNow.expiresIn(10 * 24 * 60 * 60), secretKey, JwtAlgorithm.HS384)
   }
 
   def decodeToken(token: String) = {
