@@ -86,6 +86,6 @@ object AchievementService {
 
   case class AchievementServiceResponse(bool: Boolean, message: String)
 
-  case class AchievementServiceResponseToken(boo: Boolean, data: Seq[Achievement])
+  case class AchievementServiceResponseToken(bool: Boolean, data: Seq[Achievement])
 
 }
