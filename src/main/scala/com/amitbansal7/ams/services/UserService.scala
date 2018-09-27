@@ -20,6 +20,16 @@ object UserService {
     user != null
   }
 
+  def resetPass(email: String, currentPass: String, newPass: String) = {
+    UserRepository.getByEmail(email).map {
+      case user: User if user.password.equals(User.getPasshash(currentPass)) =>
+        UserRepository.changePass(email, User.getPasshash(newPass))
+        UserServiceResponse(true, "Password successfully changed")
+
+      case _ => UserServiceResponse(false, "Email or password doesn't match")
+    }
+  }
+
   def authenticateUser(email: String, password: String): Future[AuthRes] = {
     UserRepository.getByEmail(email).map {
       case user: User if user.password == User.getPasshash(password) =>

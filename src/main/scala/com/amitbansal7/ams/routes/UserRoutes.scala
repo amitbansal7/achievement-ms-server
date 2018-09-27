@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 
 object UserRoutes {
 
-  def route: Route = toStrictEntity(2 seconds) {
+  def route: Route = {
     pathPrefix("users") {
       (path("add") & post) {
         formField(
@@ -28,8 +28,13 @@ object UserRoutes {
         }
       } ~
         (path("auth") & post) {
-          (formField('email, 'password)) { (email, password) =>
+          formField('email.as[String], 'password.as[String]) { (email, password) =>
             complete(StatusCodes.OK, UserService.authenticateUser(email, password))
+          }
+        } ~
+        (path("resetpass") & post) {
+          formField('email, 'currentpass, 'newpass) { (email, currentpass, newpass) =>
+            complete(StatusCodes.OK, UserService.resetPass(email, currentpass, newpass))
           }
         }
     }

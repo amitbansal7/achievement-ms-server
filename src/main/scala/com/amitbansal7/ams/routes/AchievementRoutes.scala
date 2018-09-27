@@ -14,7 +14,7 @@ import scala.reflect.io.File
 import scala.util.{Failure, Success}
 
 object AchievementRoutes {
-  def route: Route = toStrictEntity(2 seconds){
+  def route: Route = {
     pathPrefix("achievements") {
       (path("add") & post) {
         formField(
