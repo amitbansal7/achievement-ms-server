@@ -26,7 +26,7 @@ object Application {
 
     implicit val timeout = Timeout(5 seconds)
 
-    val route: Route = {
+    val route: Route = toStrictEntity(2 seconds) {
       (path("") & get) {
         complete(StatusCodes.OK, "Server is up and running..")
       } ~
