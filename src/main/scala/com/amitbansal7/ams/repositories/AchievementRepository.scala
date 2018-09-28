@@ -8,7 +8,7 @@ import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Updates._
 import org.mongodb.scala.result
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
 
 object AchievementRepository {
@@ -23,7 +23,7 @@ object AchievementRepository {
       .find(Document("_id" -> new ObjectId(id)))
       .first().toFuture()
 
-  def approve(id: String, approved: Boolean):Future[result.UpdateResult] =
+  def approve(id: String, approved: Boolean): Future[result.UpdateResult] =
     achievementCollection.updateOne(
       Document("_id" -> new ObjectId(id)),
       Document("$set" -> Document("approved" -> approved))

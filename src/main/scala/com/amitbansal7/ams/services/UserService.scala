@@ -2,13 +2,13 @@ package com.amitbansal.ams.services
 
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
-import com.amitbansal7.ams.services.JwtService
+import com.amitbansal7.ams.services.{AchievementService, JwtService}
 
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{Await, Future}
+import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
-import pdi.jwt.{ Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtOptions }
+import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtOptions}
 
 object UserService {
 
@@ -38,6 +38,14 @@ object UserService {
     }
   }
 
+  def isUserValid(token: String): Future[Option[UserData]] = {
+    val userF = AchievementService.getUserFromToken(token)
+    userF.map {
+      case Some(user) => Some(UserData(user.email, user.firstName, user.lastName, user.department))
+      case None => None
+    }
+  }
+
   def addUser(
     email: String,
     password: String,
@@ -56,6 +64,8 @@ object UserService {
       UserServiceResponse(true, "Account successfully created")
     }
   }
+
+  case class UserData(email: String, firstName: String, lastName: String, department: String)
 
   case class UserServiceResponse(bool: Boolean, message: String)
 

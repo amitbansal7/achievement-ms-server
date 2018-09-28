@@ -6,19 +6,19 @@ import com.amitbansal7.ams.models.Achievement
 import com.amitbansal7.ams.repositories.AchievementRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
-import java.io.{File, FileInputStream, InputStream}
+import java.io.{ File, FileInputStream, InputStream }
 import java.nio.file.Files
 
 import akka.http.scaladsl.server.directives.FileInfo
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
-import com.amitbansal7.ams.services.AchievementService.{AchievementServiceResponseToken, getUserFromToken}
-import pdi.jwt.{Jwt, JwtAlgorithm}
+import com.amitbansal7.ams.services.AchievementService.{ AchievementServiceResponseToken, getUserFromToken }
+import pdi.jwt.{ Jwt, JwtAlgorithm }
 
 import scala.util.parsing.json.JSON
-import scala.util.{Failure, Random, Success}
+import scala.util.{ Failure, Random, Success }
 
 object AchievementService {
 
@@ -51,8 +51,7 @@ object AchievementService {
             AchievementServiceResponse(true, "Done")
           } else {
             AchievementServiceResponse(false, "Access denied")
-          }
-        )
+          })
       case _ => Future(AchievementServiceResponse(false, "No user found"))
     }.flatMap(identity)
   }
