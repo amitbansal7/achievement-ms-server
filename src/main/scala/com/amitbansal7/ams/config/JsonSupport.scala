@@ -8,7 +8,7 @@ import com.amitbansal7.ams.models.Achievement
 import com.amitbansal7.ams.services.AchievementService
 import com.amitbansal7.ams.services.AchievementService.AchievementServiceResponseToken
 import org.mongodb.scala.bson.ObjectId
-import spray.json.{DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat}
+import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 
 object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
 

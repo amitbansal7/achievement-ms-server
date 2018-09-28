@@ -6,8 +6,9 @@ import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.bson.collection.mutable.Document
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Updates._
+import org.mongodb.scala.result
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
 object AchievementRepository {
@@ -17,7 +18,12 @@ object AchievementRepository {
   def addAchievement(ach: Achievement) =
     achievementCollection.insertOne(ach).toFuture()
 
-  def approve(id: String, approved: Boolean) =
+  def findById(id: String) =
+    achievementCollection
+      .find(Document("_id" -> new ObjectId(id)))
+      .first().toFuture()
+
+  def approve(id: String, approved: Boolean):Future[result.UpdateResult] =
     achievementCollection.updateOne(
       Document("_id" -> new ObjectId(id)),
       Document("$set" -> Document("approved" -> approved))

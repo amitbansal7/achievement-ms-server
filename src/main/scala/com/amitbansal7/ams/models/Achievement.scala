@@ -42,20 +42,20 @@ object Achievement {
 }
 
 case class Achievement(
-  _id: ObjectId,
-  rollno: String,
-  department: String,
-  year: Int,
-  date: String,
-  venue: String,
-  category: String,
-  participated: Boolean, //coordinated if false
-  rating: Int,
-  name: String,
-  imageUrl: String,
-  approved: Boolean,
-  description: String,
-  eventName: String
+    _id: ObjectId,
+    rollno: String,
+    department: String,
+    year: Int,
+    date: String,
+    venue: String,
+    category: String,
+    participated: Boolean, //coordinated if false
+    rating: Int,
+    name: String,
+    imageUrl: String,
+    approved: Boolean,
+    description: String,
+    eventName: String
 ) {
 
 }

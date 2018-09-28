@@ -17,7 +17,6 @@ object User {
     department: String
   ): User = new User(_id, email, password, firstName, lastName, department)
 
-
   def apply(
     email: String,
     password: String,
@@ -30,12 +29,12 @@ object User {
 }
 
 case class User(
-  _id: ObjectId,
-  email: String,
-  password: String,
-  firstName: String,
-  lastName: String,
-  department: String
+    _id: ObjectId,
+    email: String,
+    password: String,
+    firstName: String,
+    lastName: String,
+    department: String
 ) {
 
 }

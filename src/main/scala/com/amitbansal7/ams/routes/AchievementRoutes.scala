@@ -38,9 +38,8 @@ object AchievementRoutes {
           }
         }
       } ~ (path("approve") & post) {
-        parameter('id) { id =>
-          AchievementService.approveAch(id)
-          complete(StatusCodes.OK, "approved")
+        parameter('id, 'token) { (id, token) =>
+          complete(StatusCodes.OK, AchievementService.approveAch(id, token))
         }
       } ~ (path("all") & get) {
         parameter('department) { department =>

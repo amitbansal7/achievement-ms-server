@@ -12,7 +12,9 @@ import java.io.{File, FileInputStream, InputStream}
 import java.nio.file.Files
 
 import akka.http.scaladsl.server.directives.FileInfo
+import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
+import com.amitbansal7.ams.services.AchievementService.{AchievementServiceResponseToken, getUserFromToken}
 import pdi.jwt.{Jwt, JwtAlgorithm}
 
 import scala.util.parsing.json.JSON
@@ -20,26 +22,48 @@ import scala.util.{Failure, Random, Success}
 
 object AchievementService {
 
-  def approveAch(id: String) =
-    AchievementRepository.approve(id, true)
-
   def getAllApproved(department: String) =
     AchievementRepository.findAllApprovedByDepartment(department)
 
-  def getAllUnapproved(token: String) = {
+  def getUserFromToken(token: String): Future[Option[User]] =
     JwtService.decodeToken(token) match {
       case Success(value) =>
         JSON.parseFull(value._2) match {
           case Some(map: Map[String, String]) =>
             map.get("user") match {
-              case Some(email) =>
-                UserRepository.getByEmail(email).map { u =>
-                  AchievementRepository.findAllByUnApprovedDepartment(u.department)
-                }.flatMap(identity).map(d => AchievementServiceResponseToken(true, d))
-              case None => Future(AchievementServiceResponseToken(false, List()))
+              case Some(email) => UserRepository.getByEmail(email).map(u => Some(u))
+              case _ => Future(None)
             }
         }
-      case Failure(exception) => Future(AchievementServiceResponseToken(false, List()))
+      case _ => Future(None)
+    }
+
+  def approveAch(id: String, token: String): Future[AchievementServiceResponse] = {
+
+    val ach: Future[Achievement] = AchievementRepository.findById(id)
+    val user: Future[Option[User]] = getUserFromToken(token)
+
+    user.map {
+      case Some(u) =>
+        ach.map(a =>
+          if (a.isInstanceOf[Achievement] && a.department == u.department) {
+            AchievementRepository.approve(id, true)
+            AchievementServiceResponse(true, "Done")
+          } else {
+            AchievementServiceResponse(false, "Access denied")
+          }
+        )
+      case _ => Future(AchievementServiceResponse(false, "No user found"))
+    }.flatMap(identity)
+  }
+
+  def getAllUnapproved(token: String) = {
+    getUserFromToken(token).map {
+      case Some(user) =>
+        AchievementRepository
+          .findAllByUnApprovedDepartment(user.department)
+          .map(d => AchievementServiceResponseToken(true, d))
+      case None => Future(AchievementServiceResponseToken(false, List()))
     }
   }
 

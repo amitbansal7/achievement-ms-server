@@ -8,7 +8,7 @@ import org.bson.codecs.Codec
 import org.mongodb.scala._
 import org.mongodb.scala.bson.codecs.Macros._
 import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
-import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
+import org.bson.codecs.configuration.CodecRegistries.{ fromProviders, fromRegistries }
 import org.bson.codecs.configuration.CodecRegistry
 
 object MongoConfig {

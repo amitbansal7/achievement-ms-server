@@ -5,11 +5,10 @@ import com.amitbansal.ams.repositories.UserRepository
 import com.amitbansal7.ams.services.JwtService
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ Await, Future }
+import scala.util.{ Failure, Success }
 import scala.concurrent.ExecutionContext.Implicits.global
-import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtOptions}
-
+import pdi.jwt.{ Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtOptions }
 
 object UserService {
 
@@ -33,7 +32,7 @@ object UserService {
   def authenticateUser(email: String, password: String): Future[AuthRes] = {
     UserRepository.getByEmail(email).map {
       case user: User if user.password == User.getPasshash(password) =>
-        AuthRes(true, "User is authenticated", JwtService.getJwtToken(user.email))
+        AuthRes(true, "User is authenticated", JwtService.getJwtToken(user.email, user.department))
       case _ =>
         AuthRes(false, "User is not authenticated", "")
     }
@@ -45,8 +44,8 @@ object UserService {
     firstName: String,
     lastName: String,
     code: String,
-    department: String):
-  UserServiceResponse = {
+    department: String
+  ): UserServiceResponse = {
     if (code != secretCode)
       return UserServiceResponse(false, s"Secret code doesn't match")
 
