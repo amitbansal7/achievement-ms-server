@@ -1,4 +1,4 @@
-Server for achievement management system
+### Server for achievement management system
  
 ## Tech stack:
  * Scala
