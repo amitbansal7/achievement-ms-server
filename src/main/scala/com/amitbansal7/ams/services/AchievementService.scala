@@ -81,10 +81,10 @@ object AchievementService {
     meta: FileInfo
   ): AchievementServiceResponse = {
 
-    if (Achievement.departments.count(s => s == department) == 0)
+    if (!Achievement.departments.contains(department))
       return AchievementServiceResponse(false, "Not a valid department")
 
-    if (Achievement.categories.count(s => s == category) == 0)
+    if (!Achievement.categories.contains(category))
       return AchievementServiceResponse(false, "Not a valid category")
 
     if (!meta.contentType.toString().startsWith("image"))

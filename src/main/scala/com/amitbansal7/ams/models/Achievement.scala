@@ -4,8 +4,8 @@ import org.mongodb.scala.bson.ObjectId
 
 object Achievement {
 
-  val departments = List("computerscience", "education", "management")
-  val categories = List("sports", "technical", "cultural", "others")
+  val departments = Set("computerscience", "education", "management")
+  val categories = Set("sports", "technical", "cultural", "others")
 
   def apply(
     _id: ObjectId,
