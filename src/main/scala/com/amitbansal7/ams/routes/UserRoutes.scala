@@ -37,10 +37,10 @@ object UserRoutes {
           formField('email, 'currentpass, 'newpass) { (email, currentpass, newpass) =>
             complete(StatusCodes.OK, UserService.resetPass(email, currentpass, newpass))
           }
-        }~
-        (path("isvalid") & get){
-          parameter('token){ token =>
-            onSuccess(UserService.isUserValid(token)){
+        } ~
+        (path("isvalid") & get) {
+          parameter('token) { token =>
+            onSuccess(UserService.isUserValid(token)) {
               case Some(user) => complete(StatusCodes.OK, user)
               case None => complete(StatusCodes.Unauthorized)
             }

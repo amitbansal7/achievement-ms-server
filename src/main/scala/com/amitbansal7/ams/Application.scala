@@ -2,7 +2,7 @@ package com.amitbansal.ams
 
 import akka.actor.ActorSystem
 
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
@@ -12,9 +12,11 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.io.StdIn
 import akka.http.scaladsl.server.Directives._
-import com.amitbansal.ams.routes.{ AchievementRoutes, UserRoutes }
+import com.amitbansal.ams.routes.{AchievementRoutes, UserRoutes}
+import com.amitbansal7.ams.utils
+import com.amitbansal7.ams.utils.CORSHandler
 
-object Application {
+object Application extends CORSHandler {
 
   val host = "localhost"
   val port = 8090
@@ -26,11 +28,13 @@ object Application {
 
     implicit val timeout = Timeout(5 seconds)
 
-    val route: Route = toStrictEntity(2 seconds) {
-      (path("") & get) {
-        complete(StatusCodes.OK, "Server is up and running..")
-      } ~
-        AchievementRoutes.route ~ UserRoutes.route
+    val route: Route = corsHandler {
+      toStrictEntity(2 seconds) {
+        (path("") & get) {
+          complete(StatusCodes.OK, "Server is up and running..")
+        } ~
+          AchievementRoutes.route ~ UserRoutes.route
+      }
     }
 
     val bindingFuture = Http().bindAndHandle(route, host, port)

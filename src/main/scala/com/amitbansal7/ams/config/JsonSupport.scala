@@ -1,16 +1,16 @@
 package com.amitbansal.ams.config
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller}
-import akka.http.scaladsl.model.{ContentType, HttpEntity, MediaTypes}
+import akka.http.scaladsl.marshalling.{ Marshaller, ToEntityMarshaller }
+import akka.http.scaladsl.model.{ ContentType, HttpEntity, MediaTypes }
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.services.UserService
-import com.amitbansal.ams.services.UserService.{AuthRes, UserData}
+import com.amitbansal.ams.services.UserService.{ AuthRes, UserData }
 import com.amitbansal7.ams.models.Achievement
 import com.amitbansal7.ams.services.AchievementService
 import com.amitbansal7.ams.services.AchievementService.AchievementServiceResponseToken
 import org.mongodb.scala.bson.ObjectId
-import spray.json.{DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat}
+import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 
 object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
 

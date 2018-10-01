@@ -2,13 +2,13 @@ package com.amitbansal.ams.services
 
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
-import com.amitbansal7.ams.services.{AchievementService, JwtService}
+import com.amitbansal7.ams.services.{ AchievementService, JwtService }
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ Await, Future }
+import scala.util.{ Failure, Success }
 import scala.concurrent.ExecutionContext.Implicits.global
-import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtOptions}
+import pdi.jwt.{ Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtOptions }
 
 object UserService {
 
