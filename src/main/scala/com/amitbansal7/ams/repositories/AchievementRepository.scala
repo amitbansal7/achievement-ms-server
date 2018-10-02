@@ -41,4 +41,9 @@ object AchievementRepository {
         Document("department" -> department, "approved" -> true)
       ).toFuture()
 
+  def findAllApproved() =
+    achievementCollection
+      .find(
+        Document("approved" -> true)
+      ).toFuture()
 }

@@ -6,24 +6,26 @@ import com.amitbansal7.ams.models.Achievement
 import com.amitbansal7.ams.repositories.AchievementRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-import java.io.{ File, FileInputStream, InputStream }
+import java.io.{File, FileInputStream, InputStream}
 import java.nio.file.Files
 
 import akka.http.scaladsl.server.directives.FileInfo
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
-import com.amitbansal7.ams.services.AchievementService.{ AchievementServiceResponseToken, getUserFromToken }
-import pdi.jwt.{ Jwt, JwtAlgorithm }
+import com.amitbansal7.ams.services.AchievementService.{AchievementServiceResponseToken, getUserFromToken}
+import pdi.jwt.{Jwt, JwtAlgorithm}
 
 import scala.util.parsing.json.JSON
-import scala.util.{ Failure, Random, Success }
+import scala.util.{Failure, Random, Success}
 
 object AchievementService {
 
-  def getAllApproved(department: String) =
-    AchievementRepository.findAllApprovedByDepartment(department)
+  def getAllApproved(department: Option[String]): Future[Seq[Achievement]] = department match {
+    case Some(dept) => AchievementRepository.findAllApprovedByDepartment(dept.toLowerCase)
+    case None => AchievementRepository.findAllApproved()
+  }
 
   def getUserFromToken(token: String): Future[Option[User]] =
     JwtService.decodeToken(token) match {

@@ -42,8 +42,8 @@ object AchievementRoutes {
           complete(StatusCodes.OK, AchievementService.approveAch(id, token))
         }
       } ~ (path("all") & get) {
-        parameter('department) { department =>
-          val f = AchievementService.getAllApproved(department.toLowerCase)
+        parameter('department.?) { department =>
+          val f = AchievementService.getAllApproved(department)
           complete(StatusCodes.OK, f.map(r => r))
         }
       } ~ (path("unapproved") & get) {
