@@ -7,8 +7,14 @@ object JwtService {
 
   val secretKey = "secret"
 
+  val tokenExpiry = (30 days).toSeconds
+
   def getJwtToken(email: String, department: String): String = {
-    Jwt.encode(JwtClaim({ s"""{"user":"$email", "dept":"$department"}""" }).issuedNow.expiresIn(10 * 24 * 60 * 60), secretKey, JwtAlgorithm.HS384)
+    Jwt.encode(
+      JwtClaim({ s"""{"user":"$email", "dept":"$department"}""" }).issuedNow.expiresIn(tokenExpiry),
+      secretKey,
+      JwtAlgorithm.HS384
+    )
   }
 
   def decodeToken(token: String) = {
