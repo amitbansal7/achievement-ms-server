@@ -2,6 +2,8 @@ package com.amitbansal.ams.services
 
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
+import com.amitbansal7.ams.models.Achievement
+import com.amitbansal7.ams.services.AchievementService.AchievementServiceResponse
 import com.amitbansal7.ams.services.{ AchievementService, JwtService }
 
 import scala.concurrent.duration._
@@ -56,6 +58,9 @@ object UserService {
   ): UserServiceResponse = {
     if (code != secretCode)
       return UserServiceResponse(false, s"Secret code doesn't match")
+
+    if (!Achievement.departments.contains(department))
+      return UserServiceResponse(false, "Not a valid department")
 
     if (existByEmail(email))
       return UserServiceResponse(false, s"User with email ${email} already exists")
