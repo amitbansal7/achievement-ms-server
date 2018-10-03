@@ -18,22 +18,27 @@ object AchievementRoutes {
     pathPrefix("achievements") {
       (path("add") & post) {
         formField(
-          'rollno,
+          'title,
+          'rollNo,
           'department,
-          'year.as[Int],
+          'semester.as[Int],
           'date,
+          'shift,
+          'section,
+          'sessionFrom,
+          'sessionTo,
           'venue,
           'category,
           'participated.as[Boolean],
           'name,
           'description,
           'eventName,
-        ) { (rollno, department, year, date, venue, category, participated, name, description, eventName) =>
+        ) { (title, rollNo, department, semester, date, shift, section, sessionFrom, sessionTo, venue, category, participated, name, description, eventName) =>
           uploadedFile("image") {
             case (meta, file) =>
               complete(
                 StatusCodes.OK,
-                AchievementService.addAchievement(rollno, department.toLowerCase, year, date, venue, category.toLowerCase, participated, name, description, eventName, file, meta)
+                AchievementService.addAchievement(title, rollNo, department, semester, date, shift, section, sessionFrom, sessionTo, venue, category, participated, name, description, eventName, file, meta)
               )
           }
         }
@@ -42,8 +47,18 @@ object AchievementRoutes {
           complete(StatusCodes.OK, AchievementService.approveAch(id, token))
         }
       } ~ (path("all") & get) {
-        parameter('department.?) { department =>
-          val f = AchievementService.getAllApproved(department)
+        parameter(
+          'department.?,
+          'semester.as[Int].?,
+          'dateFrom.?,
+          'dateTo.?,
+          'shift.?,
+          'section.?,
+          'sessionFrom.?,
+          'sessionTo.?,
+          'category.?
+        ) { (department, semester, dateFrom, dateTo, shift, section, sessionFrom, sesstionTo, category) =>
+          val f = AchievementService.getAllApproved(department, semester, dateFrom, dateTo, shift, section, sessionFrom, sesstionTo, category)
           complete(StatusCodes.OK, f.map(r => r))
         }
       } ~ (path("unapproved") & get) {

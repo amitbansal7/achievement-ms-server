@@ -22,9 +22,38 @@ import scala.util.{ Failure, Random, Success }
 
 object AchievementService {
 
-  def getAllApproved(department: Option[String]): Future[Seq[Achievement]] = department match {
-    case Some(dept) => AchievementRepository.findAllApprovedByDepartment(dept.toLowerCase)
-    case None => AchievementRepository.findAllApproved()
+  def getAllApproved(
+    department: Option[String],
+    semester: Option[Int],
+    dateFrom: Option[String],
+    dateTo: Option[String],
+    shift: Option[String],
+    section: Option[String],
+    sessionFrom: Option[String],
+    sessionTo: Option[String],
+    category: Option[String]
+  ): Future[Seq[Achievement]] = {
+
+    def filterByfields(achs: Future[Seq[Achievement]]): Future[Seq[Achievement]] = {
+      achs.map { achss =>
+        for {
+          a: Achievement <- achss;
+          if (!semester.isDefined || (semester.isDefined && semester.get.equals(a.semester)) &&
+            (!dateFrom.isDefined || (semester.isDefined && dateFrom.get <= a.date)) &&
+            (!dateTo.isDefined || (dateTo.isDefined && dateTo.get >= a.date)) &&
+            (!shift.isDefined || (shift.isDefined && shift.get.equals(a.shift))) &&
+            (!section.isDefined || (section.isDefined && section.get.equals(a.section))) &&
+            (!sessionFrom.isDefined || (sessionFrom.isDefined && sessionFrom.get.equals(a.sessionFrom))) &&
+            (!sessionTo.isDefined || (sessionTo.isDefined && sessionTo.get.equals(a.sessionTo))) &&
+            (!category.isDefined || (category.isDefined && category.get.equals(a.category))))
+        } yield a
+      }
+    }
+
+    department match {
+      case Some(dept) => filterByfields(AchievementRepository.findAllApprovedByDepartment(dept.toLowerCase))
+      case None => filterByfields(AchievementRepository.findAllApproved())
+    }
   }
 
   def getUserFromToken(token: String): Future[Option[User]] =
@@ -69,13 +98,18 @@ object AchievementService {
   }
 
   def addAchievement(
-    rollno: String,
+    title: String,
+    rollNo: String,
     department: String,
-    year: Int,
+    semester: Int,
     date: String,
+    shift: String,
+    section: String,
+    sessionFrom: String,
+    sessionTo: String,
     venue: String,
     category: String,
-    participated: Boolean,
+    participated: Boolean, //coordinated if false
     name: String,
     description: String,
     eventName: String,
@@ -83,11 +117,20 @@ object AchievementService {
     meta: FileInfo
   ): AchievementServiceResponse = {
 
+    if (!Achievement.shifts.contains(shift))
+      return AchievementServiceResponse(false, "invalid shift")
+
+    if (!Achievement.sections.contains(section))
+      return AchievementServiceResponse(false, "invalid section")
+
+    if (!Achievement.semester.contains(semester))
+      return AchievementServiceResponse(false, "invalid semester")
+
     if (!Achievement.departments.contains(department))
-      return AchievementServiceResponse(false, "Not a valid department")
+      return AchievementServiceResponse(false, "invalid department")
 
     if (!Achievement.categories.contains(category))
-      return AchievementServiceResponse(false, "Not a valid category")
+      return AchievementServiceResponse(false, "invalid category")
 
     if (!meta.contentType.toString().startsWith("image"))
       return AchievementServiceResponse(false, "Invalid file type")
@@ -104,7 +147,7 @@ object AchievementService {
     file.delete()
 
     AchievementRepository
-      .addAchievement(Achievement.apply(rollno, department, year, date, venue, category, participated, name, fileName, description, eventName))
+      .addAchievement(Achievement.apply(title, rollNo, department, semester, date, shift, section, sessionFrom, sessionTo, venue, category, participated, name, fileName, description, eventName))
 
     AchievementServiceResponse(true, "Achievement successfully added")
   }
