@@ -46,6 +46,14 @@ object AchievementRoutes {
         parameter('id, 'token) { (id, token) =>
           complete(StatusCodes.OK, AchievementService.approveAch(id, token))
         }
+      } ~ (path("unapprove") & post) {
+        parameter('id, 'token) { (id, token) =>
+          complete(StatusCodes.OK, AchievementService.unApproveAch(id, token))
+        }
+      }~ (path("delete") & post) {
+        parameter('id, 'token) { (id, token) =>
+          complete(StatusCodes.OK, AchievementService.deleteAch(id, token))
+        }
       } ~ (path("all") & get) {
         parameter(
           'department.?,

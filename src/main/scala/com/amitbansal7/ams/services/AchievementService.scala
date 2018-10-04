@@ -69,8 +69,7 @@ object AchievementService {
       case _ => Future(None)
     }
 
-  def approveAch(id: String, token: String): Future[AchievementServiceResponse] = {
-
+  def toggleApproved(id: String, token: String, action: Boolean): Future[AchievementServiceResponse] = {
     val ach: Future[Achievement] = AchievementRepository.findById(id)
     val user: Future[Option[User]] = getUserFromToken(token)
 
@@ -78,13 +77,35 @@ object AchievementService {
       case Some(u) =>
         ach.map(a =>
           if (a.isInstanceOf[Achievement] && a.department == u.department) {
-            AchievementRepository.approve(id, true)
+            AchievementRepository.approve(id, action)
             AchievementServiceResponse(true, "Done")
           } else {
             AchievementServiceResponse(false, "Access denied")
           })
       case _ => Future(AchievementServiceResponse(false, "No user found"))
     }.flatMap(identity)
+  }
+
+  def approveAch(id: String, token: String) = toggleApproved(id, token, true)
+
+  def unApproveAch(id: String, token: String) = toggleApproved(id, token, false)
+
+  def deleteAch(id: String, token: String) = {
+    val user: Future[Option[User]] = getUserFromToken(token)
+    val ach: Future[Achievement] = AchievementRepository.findById(id)
+
+    user.map {
+      case Some(u) =>
+        ach.map(a =>
+          if (a.isInstanceOf[Achievement] && a.department == u.department) {
+            AchievementRepository.deleteOne(id)
+            AchievementServiceResponse(true, "Done")
+          } else {
+            AchievementServiceResponse(false, "Access denied")
+          })
+      case _ => Future(AchievementServiceResponse(false, "No user found"))
+    }.flatMap(identity)
+
   }
 
   def getAllUnapproved(token: String) = {

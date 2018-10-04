@@ -35,6 +35,12 @@ object AchievementRepository {
         Document("department" -> department, "approved" -> false)
       ).toFuture()
 
+  def deleteOne(id: String) =
+    achievementCollection.
+      deleteOne(
+        Document("_id" -> new ObjectId(id))
+      ).toFuture()
+
   def findAllApprovedByDepartment(department: String) =
     achievementCollection
       .find(
