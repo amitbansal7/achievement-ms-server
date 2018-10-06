@@ -38,7 +38,7 @@ object AchievementService {
       achs.map { achss =>
         for {
           a: Achievement <- achss;
-          if (!semester.isDefined || (semester.isDefined && semester.get.equals(a.semester)) &&
+          if ((!semester.isDefined || (semester.isDefined && semester.get.equals(a.semester))) &&
             (!dateFrom.isDefined || (semester.isDefined && dateFrom.get <= a.date)) &&
             (!dateTo.isDefined || (dateTo.isDefined && dateTo.get >= a.date)) &&
             (!shift.isDefined || (shift.isDefined && shift.get.equals(a.shift))) &&
