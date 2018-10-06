@@ -23,6 +23,7 @@ import scala.util.{ Failure, Random, Success }
 object AchievementService {
 
   def getAllApproved(
+    rollno: Option[String],
     department: Option[String],
     semester: Option[Int],
     dateFrom: Option[String],
@@ -38,7 +39,8 @@ object AchievementService {
       achs.map { achss =>
         for {
           a: Achievement <- achss;
-          if ((!semester.isDefined || (semester.isDefined && semester.get.equals(a.semester))) &&
+          if ((!rollno.isDefined || (rollno.isDefined && rollno.get == a.rollNo)) &&
+            (!semester.isDefined || (semester.isDefined && semester.get.equals(a.semester))) &&
             (!dateFrom.isDefined || (semester.isDefined && dateFrom.get <= a.date)) &&
             (!dateTo.isDefined || (dateTo.isDefined && dateTo.get >= a.date)) &&
             (!shift.isDefined || (shift.isDefined && shift.get.equals(a.shift))) &&

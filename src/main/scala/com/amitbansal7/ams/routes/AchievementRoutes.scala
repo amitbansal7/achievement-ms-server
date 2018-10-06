@@ -56,6 +56,7 @@ object AchievementRoutes {
         }
       } ~ (path("all") & get) {
         parameter(
+          'rollno.?,
           'department.?,
           'semester.as[Int].?,
           'dateFrom.?,
@@ -65,8 +66,8 @@ object AchievementRoutes {
           'sessionFrom.?,
           'sessionTo.?,
           'category.?
-        ) { (department, semester, dateFrom, dateTo, shift, section, sessionFrom, sesstionTo, category) =>
-          val f = AchievementService.getAllApproved(department, semester, dateFrom, dateTo, shift, section, sessionFrom, sesstionTo, category)
+        ) { (rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sesstionTo, category) =>
+          val f = AchievementService.getAllApproved(rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sesstionTo, category)
           complete(StatusCodes.OK, f.map(r => r))
         }
       } ~ (path("unapproved") & get) {
