@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import com.amitbansal.ams.config.JsonSupport._
 import com.amitbansal.ams.models.User
+import com.amitbansal7.ams.models.Achievement
 import com.amitbansal7.ams.services.AchievementService
 import com.amitbansal7.ams.services.AchievementService.AchievementServiceResponseToken
 
@@ -50,9 +51,14 @@ object AchievementRoutes {
         parameter('id, 'token) { (id, token) =>
           complete(StatusCodes.OK, AchievementService.unApproveAch(id, token))
         }
-      }~ (path("delete") & post) {
+      } ~ (path("delete") & post) {
         parameter('id, 'token) { (id, token) =>
           complete(StatusCodes.OK, AchievementService.deleteAch(id, token))
+        }
+      } ~ (path("get" / Segment) & get) { id =>
+        onSuccess(AchievementService.getOne(id)){
+          case ach: Achievement => complete(StatusCodes.OK, ach)
+          case _ =>  complete(StatusCodes.NoContent, "")
         }
       } ~ (path("all") & get) {
         parameter(

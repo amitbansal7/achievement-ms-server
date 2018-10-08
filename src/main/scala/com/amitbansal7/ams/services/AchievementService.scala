@@ -110,6 +110,9 @@ object AchievementService {
 
   }
 
+  def getOne(id: String) =
+    AchievementRepository.findById(id)
+
   def getAllUnapproved(token: String) = {
     getUserFromToken(token).map {
       case Some(user) =>
