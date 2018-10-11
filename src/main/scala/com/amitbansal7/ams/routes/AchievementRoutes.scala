@@ -56,10 +56,11 @@ object AchievementRoutes {
           complete(StatusCodes.OK, AchievementService.deleteAch(id, token))
         }
       } ~ (path("get" / Segment) & get) { id =>
-        onSuccess(AchievementService.getOne(id)){
-          case ach: Achievement => complete(StatusCodes.OK, ach)
-          case _ =>  complete(StatusCodes.NoContent, "")
-        }
+        val res = AchievementService.getOne(id)
+
+        if (!res.isDefined) complete(StatusCodes.NotFound)
+        else complete(StatusCodes.OK, res.get.map(identity))
+
       } ~ (path("all") & get) {
         parameter(
           'rollno.?,

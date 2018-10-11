@@ -15,6 +15,7 @@ import akka.http.scaladsl.server.directives.FileInfo
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
 import com.amitbansal7.ams.services.AchievementService.{ AchievementServiceResponseToken, getUserFromToken }
+import org.mongodb.scala.bson.ObjectId
 import pdi.jwt.{ Jwt, JwtAlgorithm }
 
 import scala.util.parsing.json.JSON
@@ -58,6 +59,15 @@ object AchievementService {
     }
   }
 
+  def checkObjectId(id: String): Option[ObjectId] = {
+    try {
+      val objId = new ObjectId(id)
+      Some(objId)
+    } catch {
+      case _ => None
+    }
+  }
+
   def getUserFromToken(token: String): Future[Option[User]] =
     JwtService.decodeToken(token) match {
       case Success(value) =>
@@ -72,7 +82,14 @@ object AchievementService {
     }
 
   def toggleApproved(id: String, token: String, action: Boolean): Future[AchievementServiceResponse] = {
-    val ach: Future[Achievement] = AchievementRepository.findById(id)
+    val objId = checkObjectId(id)
+
+    if (!objId.isDefined)
+      return Future {
+        AchievementServiceResponse(false, "Invalid Id")
+      }
+
+    val ach: Future[Achievement] = AchievementRepository.findById(objId.get)
     val user: Future[Option[User]] = getUserFromToken(token)
 
     user.map {
@@ -92,9 +109,17 @@ object AchievementService {
 
   def unApproveAch(id: String, token: String) = toggleApproved(id, token, false)
 
-  def deleteAch(id: String, token: String) = {
+  def deleteAch(id: String, token: String): Future[AchievementServiceResponse] = {
+
+    val objId = checkObjectId(id)
+
+    if (!objId.isDefined)
+      return Future {
+        AchievementServiceResponse(false, "Invalid Id")
+      }
+
     val user: Future[Option[User]] = getUserFromToken(token)
-    val ach: Future[Achievement] = AchievementRepository.findById(id)
+    val ach: Future[Achievement] = AchievementRepository.findById(objId.get)
 
     user.map {
       case Some(u) =>
@@ -110,8 +135,11 @@ object AchievementService {
 
   }
 
-  def getOne(id: String) =
-    AchievementRepository.findById(id)
+  def getOne(id: String): Option[Future[Achievement]] = {
+    val objId = checkObjectId(id)
+    if (!objId.isDefined) None
+    else Some(AchievementRepository.findById(objId.get))
+  }
 
   def getAllUnapproved(token: String) = {
     getUserFromToken(token).map {

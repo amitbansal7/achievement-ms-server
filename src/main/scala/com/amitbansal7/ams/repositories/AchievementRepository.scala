@@ -18,9 +18,9 @@ object AchievementRepository {
   def addAchievement(ach: Achievement) =
     achievementCollection.insertOne(ach).toFuture()
 
-  def findById(id: String) =
+  def findById(id: ObjectId) =
     achievementCollection
-      .find(Document("_id" -> new ObjectId(id)))
+      .find(Document("_id" -> id))
       .first().toFuture()
 
   def approve(id: String, approved: Boolean): Future[result.UpdateResult] =
