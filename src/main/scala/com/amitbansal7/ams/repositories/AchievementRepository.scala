@@ -23,9 +23,9 @@ object AchievementRepository {
       .find(Document("_id" -> id))
       .first().toFuture()
 
-  def approve(id: String, approved: Boolean): Future[result.UpdateResult] =
+  def approve(id: ObjectId, approved: Boolean): Future[result.UpdateResult] =
     achievementCollection.updateOne(
-      Document("_id" -> new ObjectId(id)),
+      Document("_id" -> id),
       Document("$set" -> Document("approved" -> approved))
     ).toFuture()
 
@@ -35,10 +35,10 @@ object AchievementRepository {
         Document("department" -> department, "approved" -> false)
       ).toFuture()
 
-  def deleteOne(id: String) =
+  def deleteOne(id: ObjectId) =
     achievementCollection.
       deleteOne(
-        Document("_id" -> new ObjectId(id))
+        Document("_id" -> id)
       ).toFuture()
 
   def findAllApprovedByDepartment(department: String) =

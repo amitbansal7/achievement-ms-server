@@ -96,7 +96,7 @@ object AchievementService {
       case Some(u) =>
         ach.map(a =>
           if (a.isInstanceOf[Achievement] && a.department == u.department) {
-            AchievementRepository.approve(id, action)
+            AchievementRepository.approve(objId.get, action)
             AchievementServiceResponse(true, "Done")
           } else {
             AchievementServiceResponse(false, "Access denied")
@@ -125,7 +125,7 @@ object AchievementService {
       case Some(u) =>
         ach.map(a =>
           if (a.isInstanceOf[Achievement] && a.department == u.department) {
-            AchievementRepository.deleteOne(id)
+            AchievementRepository.deleteOne(objId.get)
             AchievementServiceResponse(true, "Done")
           } else {
             AchievementServiceResponse(false, "Access denied")
