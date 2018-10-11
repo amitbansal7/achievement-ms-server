@@ -10,6 +10,7 @@ import com.amitbansal7.ams.services.AchievementService
 import com.amitbansal7.ams.services.AchievementService.AchievementServiceResponseToken
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.reflect.io.File
 import scala.util.{Failure, Success}
@@ -59,8 +60,10 @@ object AchievementRoutes {
         val res = AchievementService.getOne(id)
 
         if (!res.isDefined) complete(StatusCodes.NotFound)
-        else complete(StatusCodes.OK, res.get.map(identity))
-
+        else onSuccess(res.get){
+          case ach:Achievement => complete(StatusCodes.OK, ach)
+          case _ => complete(StatusCodes.NotFound)
+        }
       } ~ (path("all") & get) {
         parameter(
           'rollno.?,
