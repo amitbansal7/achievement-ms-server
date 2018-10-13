@@ -23,6 +23,35 @@ import scala.util.{ Failure, Random, Success }
 
 object AchievementService {
 
+  def filterByfields(
+    achs: Future[Seq[Achievement]],
+    rollno: Option[String],
+    department: Option[String],
+    semester: Option[Int],
+    dateFrom: Option[String],
+    dateTo: Option[String],
+    shift: Option[String],
+    section: Option[String],
+    sessionFrom: Option[String],
+    sessionTo: Option[String],
+    category: Option[String]
+  ): Future[Seq[Achievement]] = {
+    achs.map { achss =>
+      for {
+        a: Achievement <- achss;
+        if ((!rollno.isDefined || (rollno.isDefined && rollno.get == a.rollNo)) &&
+          (!semester.isDefined || (semester.isDefined && semester.get.equals(a.semester))) &&
+          (!dateFrom.isDefined || (semester.isDefined && dateFrom.get <= a.date)) &&
+          (!dateTo.isDefined || (dateTo.isDefined && dateTo.get >= a.date)) &&
+          (!shift.isDefined || (shift.isDefined && shift.get.equals(a.shift))) &&
+          (!section.isDefined || (section.isDefined && section.get.equals(a.section))) &&
+          (!sessionFrom.isDefined || (sessionFrom.isDefined && sessionFrom.get.equals(a.sessionFrom))) &&
+          (!sessionTo.isDefined || (sessionTo.isDefined && sessionTo.get.equals(a.sessionTo))) &&
+          (!category.isDefined || (category.isDefined && category.get.equals(a.category))))
+      } yield a
+    }
+  }
+
   def getAllApproved(
     rollno: Option[String],
     department: Option[String],
@@ -36,26 +65,13 @@ object AchievementService {
     category: Option[String]
   ): Future[Seq[Achievement]] = {
 
-    def filterByfields(achs: Future[Seq[Achievement]]): Future[Seq[Achievement]] = {
-      achs.map { achss =>
-        for {
-          a: Achievement <- achss;
-          if ((!rollno.isDefined || (rollno.isDefined && rollno.get == a.rollNo)) &&
-            (!semester.isDefined || (semester.isDefined && semester.get.equals(a.semester))) &&
-            (!dateFrom.isDefined || (semester.isDefined && dateFrom.get <= a.date)) &&
-            (!dateTo.isDefined || (dateTo.isDefined && dateTo.get >= a.date)) &&
-            (!shift.isDefined || (shift.isDefined && shift.get.equals(a.shift))) &&
-            (!section.isDefined || (section.isDefined && section.get.equals(a.section))) &&
-            (!sessionFrom.isDefined || (sessionFrom.isDefined && sessionFrom.get.equals(a.sessionFrom))) &&
-            (!sessionTo.isDefined || (sessionTo.isDefined && sessionTo.get.equals(a.sessionTo))) &&
-            (!category.isDefined || (category.isDefined && category.get.equals(a.category))))
-        } yield a
-      }
-    }
-
     department match {
-      case Some(dept) => filterByfields(AchievementRepository.findAllApprovedByDepartment(dept.toLowerCase))
-      case None => filterByfields(AchievementRepository.findAllApproved())
+      case Some(dept) => filterByfields(
+        AchievementRepository.findAllApprovedByDepartment(dept.toLowerCase), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
+      )
+      case None => filterByfields(
+        AchievementRepository.findAllApproved(), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
+      )
     }
   }
 
@@ -141,12 +157,26 @@ object AchievementService {
     else Some(AchievementRepository.findById(objId.get))
   }
 
-  def getAllUnapproved(token: String) = {
+  def getAllUnapproved(
+    token: String,
+    rollno: Option[String],
+    semester: Option[Int],
+    dateFrom: Option[String],
+    dateTo: Option[String],
+    shift: Option[String],
+    section: Option[String],
+    sessionFrom: Option[String],
+    sessionTo: Option[String],
+    category: Option[String]
+  ) = {
     getUserFromToken(token).map {
       case Some(user) =>
-        AchievementRepository
+        val data = AchievementRepository
           .findAllByUnApprovedDepartment(user.department)
-          .map(d => AchievementServiceResponseToken(true, d))
+          .map(d => filterByfields(Future(d), rollno, None, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category))
+          .flatMap(identity)
+
+        data.map(d => AchievementServiceResponseToken(true, d))
       case None => Future(AchievementServiceResponseToken(false, List()))
     }
   }
