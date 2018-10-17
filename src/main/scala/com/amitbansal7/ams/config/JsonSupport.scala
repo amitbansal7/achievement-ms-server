@@ -24,7 +24,7 @@ object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val AchievementServiceResponseFormat = jsonFormat2(AchievementService.AchievementServiceResponse)
   implicit val userFormat = jsonFormat6(User.apply)
   implicit val authResFormat = jsonFormat3(AuthRes)
-  implicit val AchievementFormat = jsonFormat19(Achievement.apply)
+  implicit val AchievementFormat = jsonFormat20(Achievement.apply)
   implicit val AchievementServiceResponseTokenFormat = jsonFormat2(AchievementServiceResponseToken)
   implicit val UserDataFormat = jsonFormat4(UserData)
   implicit val mapMarshaller: ToEntityMarshaller[Map[String, Any]] = Marshaller.opaque { map =>

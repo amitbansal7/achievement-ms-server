@@ -29,6 +29,12 @@ object AchievementRepository {
       Document("$set" -> Document("approved" -> approved))
     ).toFuture()
 
+  def approveByUser(id: ObjectId, userEmail: String): Future[result.UpdateResult] =
+    achievementCollection.updateOne(
+      Document("_id" -> id),
+      Document("$set" -> Document("approved" -> true, "approvedBy" -> userEmail))
+    ).toFuture()
+
   def findAllByUnApprovedDepartment(department: String) =
     achievementCollection
       .find(

@@ -31,7 +31,7 @@ object Achievement {
     description: String,
     eventName: String
   ): Achievement = new Achievement(_id, title, rollNo, department, semester, date, shift, section, sessionFrom, sessionTo, venue, category, participated, //coordinated if false
-    rating, name, imageUrl, approved, description, eventName)
+    rating, name, imageUrl, approved, description, eventName, None)
 
   def apply(
     title: String,
@@ -51,7 +51,7 @@ object Achievement {
     description: String,
     eventName: String
   ): Achievement = new Achievement(new ObjectId(), title, rollNo, department, semester, date, shift, section, sessionFrom, sessionTo, venue, category, participated, //coordinated if false
-    -1, name, imageUrl, false, description, eventName)
+    -1, name, imageUrl, false, description, eventName, None)
 
 }
 
@@ -74,7 +74,8 @@ case class Achievement(
     imageUrl: String,
     approved: Boolean,
     description: String,
-    eventName: String
+    eventName: String,
+    approvedBy: Option[String] //email of user
 ) {
 
 }

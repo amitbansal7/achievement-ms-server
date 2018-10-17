@@ -112,7 +112,10 @@ object AchievementService {
       case Some(u) =>
         ach.map(a =>
           if (a.isInstanceOf[Achievement] && a.department == u.department) {
-            AchievementRepository.approve(objId.get, action)
+            if (action)
+              AchievementRepository.approveByUser(objId.get, u.email)
+            else AchievementRepository.approve(objId.get, action)
+
             AchievementServiceResponse(true, "Done")
           } else {
             AchievementServiceResponse(false, "Access denied")
