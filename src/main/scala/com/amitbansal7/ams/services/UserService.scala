@@ -21,6 +21,16 @@ object UserService {
     user != null
   }
 
+  def reset(email: String, newEmail: String, firstName: String, lastName: String, password: String) = {
+    UserRepository.getByEmail(email).map {
+      case user: User if user.password == User.getPasshash(password) =>
+        UserRepository.reset(email, newEmail, firstName, lastName)
+        UserServiceResponse(true, "Profile successfully saved")
+
+      case _ => UserServiceResponse(false, "Email or password doesn't match")
+    }
+  }
+
   def resetPass(email: String, currentPass: String, newPass: String) = {
     UserRepository.getByEmail(email).map {
       case user: User if user.password.equals(User.getPasshash(currentPass)) =>

@@ -38,6 +38,11 @@ object UserRoutes {
             complete(StatusCodes.OK, UserService.resetPass(email, currentpass, newpass))
           }
         } ~
+        (path("reset") & put) {
+          formField('firstName, 'lastName, 'email, 'password, 'newEmail) { (firstName, lastName, email, password, newEmail) =>
+            complete(StatusCodes.OK, UserService.reset(email, newEmail, firstName, lastName, password))
+          }
+        } ~
         (path("isvalid") & get) {
           parameter('token) { token =>
             onSuccess(UserService.isUserValid(token)) {
