@@ -2,6 +2,7 @@ package com.amitbansal.ams.repositories
 
 import com.amitbansal.ams.config.MongoConfig
 import com.amitbansal.ams.models.User
+import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.bson.collection.mutable.Document
 import org.mongodb.scala.model.Filters._
 
@@ -13,6 +14,11 @@ object UserRepository {
 
   def getByEmail(email: String): Future[User] =
     userCollection.find(equal("email", email)).first().toFuture()
+
+  def getById(id: ObjectId) =
+    userCollection
+      .find(Document("_id" -> id))
+      .first().toFuture()
 
   def addUser(user: User) =
     userCollection.insertOne(user).toFuture()

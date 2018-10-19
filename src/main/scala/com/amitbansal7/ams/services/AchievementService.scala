@@ -113,7 +113,7 @@ object AchievementService {
         ach.map(a =>
           if (a.isInstanceOf[Achievement] && a.department == u.department) {
             if (action)
-              AchievementRepository.approveByUser(objId.get, u.email)
+              AchievementRepository.approveByUser(objId.get, u._id.toHexString)
             else AchievementRepository.approve(objId.get, action)
 
             AchievementServiceResponse(true, "Done")
@@ -157,7 +157,16 @@ object AchievementService {
   def getOne(id: String): Option[Future[Achievement]] = {
     val objId = checkObjectId(id)
     if (!objId.isDefined) None
-    else Some(AchievementRepository.findById(objId.get))
+    else {
+      val ach = AchievementRepository.findById(objId.get)
+      val res: Future[Achievement] = ach.map {
+        case a: Achievement if a.approved =>
+          val user: Future[User] = UserRepository.getById(checkObjectId(a.approvedBy.get).get)
+          user.map(u => Achievement.apply(a, Some(u.email)))
+        case a: Achievement => Future { a }
+      }.flatMap(identity)
+      Some(res)
+    }
   }
 
   def getAllUnapproved(
