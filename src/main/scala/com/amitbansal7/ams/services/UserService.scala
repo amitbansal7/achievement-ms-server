@@ -12,6 +12,8 @@ import scala.util.{ Failure, Success }
 import scala.concurrent.ExecutionContext.Implicits.global
 import pdi.jwt.{ Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtOptions }
 
+import scala.util.parsing.json.JSON
+
 object UserService {
 
   val secretCode = "code"
@@ -51,12 +53,25 @@ object UserService {
   }
 
   def isUserValid(token: String): Future[Option[UserData]] = {
-    val userF = AchievementService.getUserFromToken(token)
+    val userF = getUserFromToken(token)
     userF.map {
       case Some(user) => Some(UserData(user.email, user.firstName, user.lastName, user.department))
       case None => None
     }
   }
+
+  def getUserFromToken(token: String): Future[Option[User]] =
+    JwtService.decodeToken(token) match {
+      case Success(value) =>
+        JSON.parseFull(value._2) match {
+          case Some(map: Map[String, String]) =>
+            map.get("user") match {
+              case Some(email) => UserRepository.getByEmail(email).map(u => Some(u))
+              case _ => Future(None)
+            }
+        }
+      case _ => Future(None)
+    }
 
   def addUser(
     email: String,

@@ -3,7 +3,7 @@ package com.amitbansal.ams.config
 import java.util
 
 import com.amitbansal.ams.models.User
-import com.amitbansal7.ams.models.Achievement
+import com.amitbansal7.ams.models.{ Academic, Achievement }
 import org.bson.codecs.Codec
 import org.mongodb.scala._
 import org.mongodb.scala.bson.codecs.Macros._
@@ -15,21 +15,27 @@ object MongoConfig {
 
   val USER_COLLECTION = "user"
   val ACHIEVEMT_COLLECTION = "achievement"
+  val ACADEMIC_COLLECTION = "academic"
 
   val mongoClient = MongoClient()
 
   val userCodecRegistry = fromRegistries(fromProviders(classOf[User]), DEFAULT_CODEC_REGISTRY)
   val achievementCodecRegistry = fromRegistries(fromProviders(classOf[Achievement]), userCodecRegistry)
+  val academicCodecRegistry = fromRegistries(fromProviders(classOf[Academic]), achievementCodecRegistry)
 
   val db = mongoClient
     .getDatabase("ams")
-    .withCodecRegistry(achievementCodecRegistry)
+    .withCodecRegistry(academicCodecRegistry)
 
   val userCollection: MongoCollection[User] = db.getCollection(USER_COLLECTION)
 
   val achievementCollection: MongoCollection[Achievement] = db.getCollection(ACHIEVEMT_COLLECTION)
 
+  val academicCollection: MongoCollection[Academic] = db.getCollection(ACADEMIC_COLLECTION)
+
   def getachievementCollection = achievementCollection
+
+  def getAcademicCollection = academicCollection
 
   def getUserCollection = userCollection
 

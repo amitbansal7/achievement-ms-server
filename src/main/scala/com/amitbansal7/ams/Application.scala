@@ -13,6 +13,7 @@ import scala.concurrent.duration._
 import scala.io.StdIn
 import akka.http.scaladsl.server.Directives._
 import com.amitbansal.ams.routes.{ AchievementRoutes, UserRoutes }
+import com.amitbansal7.ams.routes.AcademicRoutes
 import com.amitbansal7.ams.utils
 import com.amitbansal7.ams.utils.CORSHandler
 
@@ -33,7 +34,7 @@ object Application extends CORSHandler {
         (path("") & get) {
           complete(StatusCodes.OK, "Server is up and running..")
         } ~
-          AchievementRoutes.route ~ UserRoutes.route
+          AchievementRoutes.route ~ UserRoutes.route ~ AcademicRoutes.route
       }
     }
 

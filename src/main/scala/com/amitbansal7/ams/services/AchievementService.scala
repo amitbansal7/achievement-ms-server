@@ -14,7 +14,8 @@ import java.nio.file.Files
 import akka.http.scaladsl.server.directives.FileInfo
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
-import com.amitbansal7.ams.services.AchievementService.{ AchievementServiceResponseToken, getUserFromToken }
+import com.amitbansal.ams.services.UserService
+import com.amitbansal7.ams.services.AchievementService.{ AchievementServiceResponseToken }
 import org.mongodb.scala.bson.ObjectId
 import pdi.jwt.{ Jwt, JwtAlgorithm }
 
@@ -75,30 +76,8 @@ object AchievementService {
     }
   }
 
-  def checkObjectId(id: String): Option[ObjectId] = {
-    try {
-      val objId = new ObjectId(id)
-      Some(objId)
-    } catch {
-      case _ => None
-    }
-  }
-
-  def getUserFromToken(token: String): Future[Option[User]] =
-    JwtService.decodeToken(token) match {
-      case Success(value) =>
-        JSON.parseFull(value._2) match {
-          case Some(map: Map[String, String]) =>
-            map.get("user") match {
-              case Some(email) => UserRepository.getByEmail(email).map(u => Some(u))
-              case _ => Future(None)
-            }
-        }
-      case _ => Future(None)
-    }
-
   def toggleApproved(id: String, token: String, action: Boolean): Future[AchievementServiceResponse] = {
-    val objId = checkObjectId(id)
+    val objId = Utils.checkObjectId(id)
 
     if (!objId.isDefined)
       return Future {
@@ -106,7 +85,7 @@ object AchievementService {
       }
 
     val ach: Future[Achievement] = AchievementRepository.findById(objId.get)
-    val user: Future[Option[User]] = getUserFromToken(token)
+    val user: Future[Option[User]] = UserService.getUserFromToken(token)
 
     user.map {
       case Some(u) =>
@@ -130,14 +109,14 @@ object AchievementService {
 
   def deleteAch(id: String, token: String): Future[AchievementServiceResponse] = {
 
-    val objId = checkObjectId(id)
+    val objId = Utils.checkObjectId(id)
 
     if (!objId.isDefined)
       return Future {
         AchievementServiceResponse(false, "Invalid Id")
       }
 
-    val user: Future[Option[User]] = getUserFromToken(token)
+    val user: Future[Option[User]] = UserService.getUserFromToken(token)
     val ach: Future[Achievement] = AchievementRepository.findById(objId.get)
 
     user.map {
@@ -155,13 +134,13 @@ object AchievementService {
   }
 
   def getOne(id: String): Option[Future[Achievement]] = {
-    val objId = checkObjectId(id)
+    val objId = Utils.checkObjectId(id)
     if (!objId.isDefined) None
     else {
       val ach = AchievementRepository.findById(objId.get)
       val res: Future[Achievement] = ach.map {
         case a: Achievement if a.approved =>
-          val user: Future[User] = UserRepository.getById(checkObjectId(a.approvedBy.get).get)
+          val user: Future[User] = UserRepository.getById(Utils.checkObjectId(a.approvedBy.get).get)
           user.map(u => Achievement.apply(a, Some(u.email)))
         case a: Achievement => Future { a }
       }.flatMap(identity)
@@ -181,7 +160,7 @@ object AchievementService {
     sessionTo: Option[String],
     category: Option[String]
   ) = {
-    getUserFromToken(token).map {
+    UserService.getUserFromToken(token).map {
       case Some(user) =>
         val data = AchievementRepository
           .findAllByUnApprovedDepartment(user.department)
