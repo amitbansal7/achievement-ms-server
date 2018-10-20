@@ -11,10 +11,10 @@ import scala.concurrent.Future
 
 object AcademicService {
 
-  def add(rollNo: String, name: String, batch: String, programme: String, token: String) = {
+  def add(rollNo: String, name: String, batch: String, programme: String, token: String): Future[AcademicServiceResponse] = {
 
     if (!Academic.programmes.contains(programme))
-      AcademicServiceResponse(false, "Invalid programme name.")
+      return Future { AcademicServiceResponse(false, "Invalid programme name.") }
 
     val user: Future[Option[User]] = UserService.getUserFromToken(token)
 
@@ -35,7 +35,7 @@ object AcademicService {
       return Future(AcademicServiceResponse(false, "Invalid Id"))
 
     if (!Academic.programmes.contains(programme))
-      AcademicServiceResponse(false, "Invalid programme name.")
+      return Future(AcademicServiceResponse(false, "Invalid programme name."))
 
     val user: Future[Option[User]] = UserService.getUserFromToken(token)
 
