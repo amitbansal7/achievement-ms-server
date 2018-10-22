@@ -16,9 +16,10 @@ object AcademicRoutes {
           'name,
           'batch,
           'programme,
-          'token
-        ) { (rollNo, name, batch, programme, token) =>
-            complete(AcademicService.add(rollNo, name, batch, programme, token))
+          'token,
+          'category
+        ) { (rollNo, name, batch, programme, token, category) =>
+            complete(AcademicService.add(rollNo, name, batch, programme, category, token))
           }
       } ~ (path("delete") & post) {
         formField('id, 'token) { (id, token) =>
@@ -33,9 +34,10 @@ object AcademicRoutes {
           'name,
           'batch,
           'programme,
-          'token
-        ) { (id, rollNo, name, batch, programme, token) =>
-            complete(AcademicService.edit(id, rollNo, name, batch, programme, token))
+          'token,
+          'category
+        ) { (id, rollNo, name, batch, programme, token, category) =>
+            complete(AcademicService.edit(id, rollNo, name, batch, programme, category, token))
           }
       }
     }

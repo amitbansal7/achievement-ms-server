@@ -15,7 +15,7 @@ object AcademicRepository {
   def delete(id: ObjectId) =
     academicCollection.deleteOne(Document("_id" -> id)).toFuture()
 
-  def update(id: ObjectId, rollNo: String, name: String, batch: String, programme: String) =
+  def update(id: ObjectId, rollNo: String, name: String, batch: String, programme: String, category: String) =
     academicCollection
       .updateOne(
         Document("_id" -> id),
@@ -24,7 +24,8 @@ object AcademicRepository {
             "rollNo" -> rollNo,
             "name" -> name,
             "batch" -> batch,
-            "programme" -> programme
+            "programme" -> programme,
+            "category" -> category
           )
         )
       ).toFuture()

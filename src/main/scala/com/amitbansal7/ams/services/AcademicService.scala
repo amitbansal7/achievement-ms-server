@@ -11,23 +11,26 @@ import scala.concurrent.Future
 
 object AcademicService {
 
-  def add(rollNo: String, name: String, batch: String, programme: String, token: String): Future[AcademicServiceResponse] = {
+  def add(rollNo: String, name: String, batch: String, programme: String, category: String, token: String): Future[AcademicServiceResponse] = {
 
     if (!Academic.programmes.contains(programme))
       return Future { AcademicServiceResponse(false, "Invalid programme name.") }
+
+    if (!Academic.categories.contains(category))
+      return Future(AcademicServiceResponse(false, "Invalid Category"))
 
     val user: Future[Option[User]] = UserService.getUserFromToken(token)
 
     user.map {
       case Some(_) =>
-        AcademicRepository.add(Academic(rollNo, name, batch, programme))
+        AcademicRepository.add(Academic(rollNo, name, batch, programme, category))
         AcademicServiceResponse(true, "Record successfully added.")
       case None =>
         AcademicServiceResponse(false, "Access denied.")
     }
   }
 
-  def edit(id: String, rollNo: String, name: String, batch: String, programme: String, token: String): Future[AcademicServiceResponse] = {
+  def edit(id: String, rollNo: String, name: String, batch: String, programme: String, category: String, token: String): Future[AcademicServiceResponse] = {
 
     val objId = Utils.checkObjectId(id)
 
@@ -37,11 +40,14 @@ object AcademicService {
     if (!Academic.programmes.contains(programme))
       return Future(AcademicServiceResponse(false, "Invalid programme name."))
 
+    if (!Academic.categories.contains(category))
+      return Future(AcademicServiceResponse(false, "Invalid Category"))
+
     val user: Future[Option[User]] = UserService.getUserFromToken(token)
 
     user.map {
       case Some(_) =>
-        AcademicRepository.update(objId.get, rollNo, name, batch, programme)
+        AcademicRepository.update(objId.get, rollNo, name, batch, programme, category)
         AcademicServiceResponse(true, "Record successfully edited.")
       case None =>
         AcademicServiceResponse(false, "Access denied.")
