@@ -19,7 +19,8 @@ import com.amitbansal7.ams.utils.CORSHandler
 
 object Application extends CORSHandler {
 
-  val host = "localhost"
+  val host = "0.0.0.0"
+
   val port = 8090
 
   def main(args: Array[String]): Unit = {
