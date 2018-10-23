@@ -14,7 +14,9 @@ object AcademicService {
   def add(rollNo: String, name: String, batch: String, programme: String, category: String, token: String): Future[AcademicServiceResponse] = {
 
     if (!Academic.programmes.contains(programme))
-      return Future { AcademicServiceResponse(false, "Invalid programme name.") }
+      return Future {
+        AcademicServiceResponse(false, "Invalid programme name.")
+      }
 
     if (!Academic.categories.contains(category))
       return Future(AcademicServiceResponse(false, "Invalid Category"))
@@ -54,9 +56,16 @@ object AcademicService {
     }
   }
 
-  def getAll() = AcademicRepository
-    .getAll()
-    .map(seq => seq.sortBy(a => a.batch > a.batch))
+  def getAll(programme: Option[String], batch: Option[String], category: Option[String]) = {
+    AcademicRepository.getAll().map { ach =>
+      for {
+        a <- ach
+        if ((!programme.isDefined || (programme.isDefined && a.programme == programme.get)) &&
+          (!batch.isDefined || (batch.isDefined && a.batch == batch.get)) &&
+          (!category.isDefined || (category.isDefined && a.category == category.get)))
+      } yield a
+    }.map(seq => seq.sortBy(a => a.batch > a.batch))
+  }
 
   def deleteOne(id: String, token: String): Future[AcademicServiceResponse] = {
     val objId = Utils.checkObjectId(id)

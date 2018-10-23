@@ -26,7 +26,9 @@ object AcademicRoutes {
           complete(AcademicService.deleteOne(id, token))
         }
       } ~ (path("getall") & get) {
-        complete(AcademicService.getAll())
+        parameter('programme.?, 'batch.?, 'category.?) { (programme, batch, category) =>
+          complete(AcademicService.getAll(programme, batch, category))
+        }
       } ~ (path("edit") & put) {
         formField(
           'id,
