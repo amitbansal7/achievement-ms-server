@@ -7,7 +7,7 @@ object Achievement {
   val departments = Set("computerscience", "education", "management", "commerce")
   val categories = Set("sports", "technical", "cultural", "others")
   val shifts = Set("morning", "evening")
-  val sections = Set("A", "B", "C", "D")
+  val sections = Set("A", "B", "C")
   val semester = Set(1, 2, 3, 4, 5, 6)
 
   def apply(

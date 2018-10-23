@@ -54,7 +54,9 @@ object AcademicService {
     }
   }
 
-  def getAll() = AcademicRepository.getAll()
+  def getAll() = AcademicRepository
+    .getAll()
+    .map(seq => seq.sortBy(a => a.batch > a.batch))
 
   def deleteOne(id: String, token: String): Future[AcademicServiceResponse] = {
     val objId = Utils.checkObjectId(id)
