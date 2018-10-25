@@ -13,7 +13,7 @@
 5. Run MongoDB using ```mongod``` and in the new tab create mongo client using ```mongo```.
 6. On the mongo client console type ```use ams``` to create an empty database required for this server.
 7. After downloading all the necessary dependencies is done, type ```run``` on the sbt console.
-8. Go to ```http://localhost:8090/``` and you should see "Server is up and running..".
+8. Go to ```http://localhost:8080/``` and you should see "Server is up and running..".
 
 
 

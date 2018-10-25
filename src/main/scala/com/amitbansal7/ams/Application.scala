@@ -21,7 +21,7 @@ object Application extends CORSHandler {
 
   val host = "0.0.0.0"
 
-  val port = 8090
+  val port = 8080
 
   def main(args: Array[String]): Unit = {
     implicit val system = ActorSystem("achievement-management-system")
