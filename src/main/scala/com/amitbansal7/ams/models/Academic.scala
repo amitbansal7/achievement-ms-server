@@ -4,7 +4,7 @@ import org.mongodb.scala.bson.ObjectId
 
 object Academic {
 
-  val programmes = Set("B. Ed.", "BBA (H) 4 years", "BBA (General)", "BBA (B&I)", "BBA (T&TM)", "BCA")
+  val programmes = Set("B. Ed.", "BBA (H) 4 years", "BBA (General)", "BBA (B&I)", "BBA (T&TM)", "BCA", "B.Com (H)")
 
   val categories = Set("goldmedalist", "exemplary", "both")
 
