@@ -216,7 +216,7 @@ object AchievementService {
       .foldLeft("")((acc, ch) => acc + ch)
 
     val fileName = (str + meta.getFileName).replace(" ", "-")
-    val outFile = new File("static/" + fileName)
+    val outFile = new File("/mnt/data/static/" + fileName)
 
     Files.copy(file.toPath, outFile.toPath)
     file.delete()
