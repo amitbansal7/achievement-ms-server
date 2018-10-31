@@ -31,7 +31,7 @@ object Application extends CORSHandler {
     implicit val timeout = Timeout(5 seconds)
 
     val route: Route = corsHandler {
-      toStrictEntity(2 seconds) {
+      toStrictEntity(10 seconds) {
         (path("") & get) {
           complete(StatusCodes.OK, "Server is up and running..")
         } ~
