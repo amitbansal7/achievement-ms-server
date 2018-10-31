@@ -230,7 +230,7 @@ object AchievementService {
     val fileName = (str + meta.getFileName).replace(" ", "-")
     val outFile = new File(baseStaticPath + fileName)
 
-    val path = Paths.get("static/" + fileName)
+    val path = Paths.get(baseStaticPath + fileName)
     Files.write(path, imageRes.buffer)
 
     ////    Files.write(outFile.toPath, imageRes.buffer)
