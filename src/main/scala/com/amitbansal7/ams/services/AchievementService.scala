@@ -18,11 +18,16 @@ import com.amitbansal.ams.services.UserService
 import com.amitbansal7.ams.services.AchievementService.{ AchievementServiceResponseToken }
 import org.mongodb.scala.bson.ObjectId
 import pdi.jwt.{ Jwt, JwtAlgorithm }
-
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.Path
 import scala.util.parsing.json.JSON
 import scala.util.{ Failure, Random, Success }
 
 object AchievementService {
+
+  // /mnt/data/static
+  val baseStaticPath = "/mnt/data/static/"
 
   def filterByfields(
     achs: Future[Seq[Achievement]],
@@ -142,7 +147,9 @@ object AchievementService {
         case a: Achievement if a.approved =>
           val user: Future[User] = UserRepository.getById(Utils.checkObjectId(a.approvedBy.get).get)
           user.map(u => Achievement.apply(a, Some(u.email)))
-        case a: Achievement => Future { a }
+        case a: Achievement => Future {
+          a
+        }
       }.flatMap(identity)
       Some(res)
     }
@@ -210,15 +217,25 @@ object AchievementService {
     if (!meta.contentType.toString().startsWith("image"))
       return AchievementServiceResponse(false, "Invalid file type")
 
+    val imageRes = ImageCompressionService.processImage(file)
+
+    //    if (!imageRes.bool)
+    //      return AchievementServiceResponse(false, imageRes.message)
+
     val str = Random
       .alphanumeric
       .take(7).toList
       .foldLeft("")((acc, ch) => acc + ch)
 
     val fileName = (str + meta.getFileName).replace(" ", "-")
-    val outFile = new File("/mnt/data/static/" + fileName)
+    val outFile = new File(baseStaticPath + fileName)
 
-    Files.copy(file.toPath, outFile.toPath)
+    val path = Paths.get("static/" + fileName)
+    Files.write(path, imageRes.buffer)
+
+    ////    Files.write(outFile.toPath, imageRes.buffer)
+    //    Files.copy(file.toPath, outFile.toPath)
+    //        Files.copy(file.buffer, outFile.toPath)
     file.delete()
 
     AchievementRepository
