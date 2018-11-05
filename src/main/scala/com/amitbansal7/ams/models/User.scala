@@ -15,7 +15,7 @@ object User {
     firstName: String,
     lastName: String,
     department: String,
-    shift:String
+    shift: String
   ): User = new User(_id, email, password, firstName, lastName, department, shift)
 
   def apply(
@@ -24,7 +24,7 @@ object User {
     firstName: String,
     lastName: String,
     department: String,
-    shift:String
+    shift: String
   ): User = {
     new User(new ObjectId(), email, getPasshash(password), firstName, lastName, department.toLowerCase, shift)
   }
@@ -37,7 +37,7 @@ case class User(
     firstName: String,
     lastName: String,
     department: String,
-  shift:String
+    shift: String
 ) {
 
 }

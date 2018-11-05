@@ -23,7 +23,7 @@ object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
 
   implicit val userServiceResponseFormat = jsonFormat2(UserService.UserServiceResponse)
   implicit val AchievementServiceResponseFormat = jsonFormat2(AchievementService.AchievementServiceResponse)
-  implicit val userFormat = jsonFormat6(User.apply)
+  implicit val userFormat = jsonFormat7(User.apply)
   implicit val authResFormat = jsonFormat3(AuthRes)
   implicit val AchievementFormat = jsonFormat20(Achievement.apply)
   implicit val AcademicFormat = jsonFormat6(Academic.apply)

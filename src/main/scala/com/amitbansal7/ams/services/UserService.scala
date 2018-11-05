@@ -80,7 +80,7 @@ object UserService {
     lastName: String,
     code: String,
     department: String,
-    shift:String
+    shift: String
   ): UserServiceResponse = {
     if (code != secretCode)
       return UserServiceResponse(false, s"Secret code doesn't match")
@@ -88,7 +88,7 @@ object UserService {
     if (!Achievement.departments.contains(department))
       return UserServiceResponse(false, "Not a valid department")
 
-    if(!Achievement.shifts.contains(shift))
+    if (!Achievement.shifts.contains(shift))
       return UserServiceResponse(false, "Invalid shift")
 
     if (existByEmail(email))
