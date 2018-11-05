@@ -146,12 +146,16 @@ object AchievementService {
       val res: Future[Achievement] = ach.map {
         case a: Achievement if a.approved =>
           val user: Future[User] = UserRepository.getById(Utils.checkObjectId(a.approvedBy.get).get)
-          user.map(u => Achievement.apply(a, Some(u.email)))
+          user.map { u =>
+            if (u != null) Achievement.apply(a, Some(u.email))
+            else Achievement.apply(a, None)
+          }
         case a: Achievement => Future {
           a
         }
       }.flatMap(identity)
       Some(res)
+
     }
   }
 
