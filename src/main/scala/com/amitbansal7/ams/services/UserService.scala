@@ -55,7 +55,7 @@ object UserService {
   def isUserValid(token: String): Future[Option[UserData]] = {
     val userF = getUserFromToken(token)
     userF.map {
-      case Some(user) => Some(UserData(user.email, user.firstName, user.lastName, user.department))
+      case Some(user) => Some(UserData(user.email, user.firstName, user.lastName, user.department, user.shift))
       case None => None
     }
   }
@@ -99,7 +99,7 @@ object UserService {
     }
   }
 
-  case class UserData(email: String, firstName: String, lastName: String, department: String)
+  case class UserData(email: String, firstName: String, lastName: String, department: String, shift: String)
 
   case class UserServiceResponse(bool: Boolean, message: String)
 

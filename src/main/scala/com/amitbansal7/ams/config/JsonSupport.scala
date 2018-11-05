@@ -29,7 +29,7 @@ object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val AcademicFormat = jsonFormat6(Academic.apply)
   implicit val AcademicServiceResp = jsonFormat2(AcademicServiceResponse)
   implicit val AchievementServiceResponseTokenFormat = jsonFormat2(AchievementServiceResponseToken)
-  implicit val UserDataFormat = jsonFormat4(UserData)
+  implicit val UserDataFormat = jsonFormat5(UserData)
   implicit val mapMarshaller: ToEntityMarshaller[Map[String, Any]] = Marshaller.opaque { map =>
     HttpEntity(ContentType(MediaTypes.`application/json`), map.toString)
   }
