@@ -35,10 +35,10 @@ object AchievementRepository {
       Document("$set" -> Document("approved" -> true, "approvedBy" -> userEmail))
     ).toFuture()
 
-  def findAllByUnApprovedDepartment(department: String) =
+  def findAllByUnApprovedDepartmentAndDepartment(department: String, shift: String) =
     achievementCollection
       .find(
-        Document("department" -> department, "approved" -> false)
+        Document("department" -> department, "approved" -> false, "shift" -> shift)
       ).toFuture()
 
   def deleteOne(id: ObjectId) =

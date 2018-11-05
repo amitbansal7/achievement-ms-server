@@ -22,10 +22,11 @@ object UserRoutes {
           'firstName,
           'lastName,
           'code,
-          'department
+          'department,
+          'shift,
         ) {
-            (email, password, firstName, lastName, code, department) =>
-              complete(StatusCodes.OK, UserService.addUser(email, password, firstName, lastName, code, department))
+            (email, password, firstName, lastName, code, department, shift) =>
+              complete(StatusCodes.OK, UserService.addUser(email, password, firstName, lastName, code, department, shift))
           }
       } ~
         (path("auth") & post) {

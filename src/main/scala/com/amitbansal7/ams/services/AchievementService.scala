@@ -95,7 +95,7 @@ object AchievementService {
     user.map {
       case Some(u) =>
         ach.map(a =>
-          if (a.isInstanceOf[Achievement] && a.department == u.department) {
+          if (a.isInstanceOf[Achievement] && a.department == u.department && u.shift == a.shift) {
             if (action)
               AchievementRepository.approveByUser(objId.get, u._id.toHexString)
             else AchievementRepository.approve(objId.get, action)
@@ -127,7 +127,7 @@ object AchievementService {
     user.map {
       case Some(u) =>
         ach.map(a =>
-          if (a.isInstanceOf[Achievement] && a.department == u.department) {
+          if (a.isInstanceOf[Achievement] && a.department == u.department && a.shift == u.shift) {
             AchievementRepository.deleteOne(objId.get)
             AchievementServiceResponse(true, "Done")
           } else {
@@ -170,7 +170,7 @@ object AchievementService {
     UserService.getUserFromToken(token).map {
       case Some(user) =>
         val data = AchievementRepository
-          .findAllByUnApprovedDepartment(user.department)
+          .findAllByUnApprovedDepartmentAndDepartment(user.department, user.shift)
           .map(d => filterByfields(Future(d), rollno, None, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category))
           .flatMap(identity)
 
