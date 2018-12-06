@@ -26,22 +26,22 @@ object UserRoutes {
           'shift,
         ) {
             (email, password, firstName, lastName, code, department, shift) =>
-              complete(StatusCodes.OK, UserService.addUser(email, password, firstName, lastName, code, department, shift))
+              complete(StatusCodes.OK, UserService.addUser(email.toLowerCase, password, firstName, lastName, code, department, shift))
           }
       } ~
         (path("auth") & post) {
           formField('email.as[String], 'password.as[String]) { (email, password) =>
-            complete(StatusCodes.OK, UserService.authenticateUser(email, password))
+            complete(StatusCodes.OK, UserService.authenticateUser(email.toLowerCase, password))
           }
         } ~
         (path("resetpass") & post) {
           formField('email, 'currentpass, 'newpass) { (email, currentpass, newpass) =>
-            complete(StatusCodes.OK, UserService.resetPass(email, currentpass, newpass))
+            complete(StatusCodes.OK, UserService.resetPass(email.toLowerCase, currentpass, newpass))
           }
         } ~
         (path("reset") & put) {
           formField('firstName, 'lastName, 'email, 'password, 'newEmail) { (firstName, lastName, email, password, newEmail) =>
-            complete(StatusCodes.OK, UserService.reset(email, newEmail, firstName, lastName, password))
+            complete(StatusCodes.OK, UserService.reset(email.toLowerCase, newEmail.toLowerCase, firstName, lastName, password))
           }
         } ~
         (path("isvalid") & get) {
