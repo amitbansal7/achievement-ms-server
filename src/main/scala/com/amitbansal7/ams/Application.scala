@@ -16,12 +16,24 @@ import com.amitbansal.ams.routes.{ AchievementRoutes, UserRoutes }
 import com.amitbansal7.ams.routes.AcademicRoutes
 import com.amitbansal7.ams.utils
 import com.amitbansal7.ams.utils.CORSHandler
+import akka.event.Logging
+import scala.util.parsing.json.JSON
 
 object Application extends CORSHandler {
 
   val host = "0.0.0.0"
 
   val port = 8080
+
+  val json = JSON.parseFull(scala.io.Source.fromResource("data.json").getLines().toList.mkString)
+
+  val resource = json.map {
+    case map: Map[String, String] => map
+    case _ => {
+      println("data.json parsing failed")
+      Map[String, Any]()
+    }
+  }.get
 
   def main(args: Array[String]): Unit = {
     implicit val system = ActorSystem("achievement-management-system")
