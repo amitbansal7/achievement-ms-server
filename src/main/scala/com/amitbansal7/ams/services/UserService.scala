@@ -1,5 +1,6 @@
 package com.amitbansal.ams.services
 
+import com.amitbansal.ams.Application
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
 import com.amitbansal7.ams.models.Achievement
@@ -16,7 +17,7 @@ import scala.util.parsing.json.JSON
 
 object UserService {
 
-  val secretCode = "code"
+  val secretCode = Application.resource.getOrElse("inviteCode", "invalidCode").toString
 
   def existByEmail(email: String): Boolean = {
     val user = Await.result(UserRepository.getByEmail(email), 1 seconds)
@@ -56,6 +57,7 @@ object UserService {
   }
 
   def isUserValid(token: String): Future[Option[UserData]] = {
+    println("SecretCode is" + secretCode)
     val userF = getUserFromToken(token)
     userF.map {
       case Some(user) => Some(UserData(user.email, user.firstName, user.lastName, user.department, user.shift))

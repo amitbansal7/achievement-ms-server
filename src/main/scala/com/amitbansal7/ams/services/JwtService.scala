@@ -1,11 +1,13 @@
 package com.amitbansal7.ams.services
 
+import com.amitbansal.ams.Application
 import pdi.jwt.{ Jwt, JwtAlgorithm, JwtClaim }
+
 import scala.concurrent.duration._
 
 object JwtService {
 
-  val secretKey = "secret"
+  val secretKey = Application.resource.getOrElse("jwtKey", "error").toString
 
   val tokenExpiry = (30 days).toSeconds
 
