@@ -47,7 +47,7 @@ object AchievementService {
         a: Achievement <- achss;
         if ((!rollno.isDefined || (rollno.isDefined && rollno.get == a.rollNo)) &&
           (!semester.isDefined || (semester.isDefined && semester.get.equals(a.semester))) &&
-          (!dateFrom.isDefined || (semester.isDefined && dateFrom.get <= a.date)) &&
+          (!dateFrom.isDefined || (dateFrom.isDefined && dateFrom.get <= a.date)) &&
           (!dateTo.isDefined || (dateTo.isDefined && dateTo.get >= a.date)) &&
           (!shift.isDefined || (shift.isDefined && shift.get.equals(a.shift))) &&
           (!section.isDefined || (section.isDefined && section.get.equals(a.section))) &&
