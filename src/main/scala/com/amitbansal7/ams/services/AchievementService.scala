@@ -29,6 +29,12 @@ object AchievementService {
   // /mnt/data/static
   val baseStaticPath = "/mnt/data/static/"
 
+  def paginate(achs: Seq[Achievement], offset: Option[Int], limit: Option[Int]): Seq[Achievement] = {
+    if (offset.isDefined && limit.isDefined) {
+      achs.toList.drop(offset.get).take(limit.get)
+    } else achs
+  }
+
   def filterByfields(
     achs: Future[Seq[Achievement]],
     rollno: Option[String],
@@ -73,13 +79,18 @@ object AchievementService {
     limit: Option[Int]
   ): Future[Seq[Achievement]] = {
 
-    department match {
-      case Some(dept) => filterByfields(
-        AchievementRepository.findAllApprovedByDepartment(dept.toLowerCase, offset, limit), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
-      )
+    val result = department match {
+      case Some(dept) =>
+        filterByfields(
+          AchievementRepository.findAllApprovedByDepartment(dept.toLowerCase), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
+        )
       case None => filterByfields(
         AchievementRepository.findAllApproved(offset, limit), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
       )
+    }
+
+    result.map { d =>
+      paginate(d, offset, limit)
     }
   }
 
@@ -178,11 +189,11 @@ object AchievementService {
     UserService.getUserFromToken(token).map {
       case Some(user) =>
         val data = AchievementRepository
-          .findAllByUnApprovedDepartmentAndDepartment(user.department, user.shift, offset, limit)
+          .findAllByUnApprovedDepartmentAndDepartment(user.department, user.shift)
           .map(d => filterByfields(Future(d), rollno, None, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category))
           .flatMap(identity)
 
-        data.map(d => AchievementServiceResponseToken(true, d))
+        data.map(d => AchievementServiceResponseToken(true, paginate(d, offset, limit)))
       case None => Future(AchievementServiceResponseToken(false, List()))
     }
   }
