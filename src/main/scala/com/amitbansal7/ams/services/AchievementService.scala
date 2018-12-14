@@ -68,15 +68,17 @@ object AchievementService {
     section: Option[String],
     sessionFrom: Option[String],
     sessionTo: Option[String],
-    category: Option[String]
+    category: Option[String],
+    offset: Option[Int],
+    limit: Option[Int]
   ): Future[Seq[Achievement]] = {
 
     department match {
       case Some(dept) => filterByfields(
-        AchievementRepository.findAllApprovedByDepartment(dept.toLowerCase), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
+        AchievementRepository.findAllApprovedByDepartment(dept.toLowerCase, offset, limit), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
       )
       case None => filterByfields(
-        AchievementRepository.findAllApproved(), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
+        AchievementRepository.findAllApproved(offset, limit), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
       )
     }
   }
@@ -169,12 +171,14 @@ object AchievementService {
     section: Option[String],
     sessionFrom: Option[String],
     sessionTo: Option[String],
-    category: Option[String]
+    category: Option[String],
+    offset: Option[Int],
+    limit: Option[Int]
   ) = {
     UserService.getUserFromToken(token).map {
       case Some(user) =>
         val data = AchievementRepository
-          .findAllByUnApprovedDepartmentAndDepartment(user.department, user.shift)
+          .findAllByUnApprovedDepartmentAndDepartment(user.department, user.shift, offset, limit)
           .map(d => filterByfields(Future(d), rollno, None, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category))
           .flatMap(identity)
 

@@ -35,11 +35,13 @@ object AchievementRepository {
       Document("$set" -> Document("approved" -> true, "approvedBy" -> userEmail))
     ).toFuture()
 
-  def findAllByUnApprovedDepartmentAndDepartment(department: String, shift: String) =
+  def findAllByUnApprovedDepartmentAndDepartment(department: String, shift: String, offset: Option[Int], limit: Option[Int]) =
     achievementCollection
       .find(
         Document("department" -> department, "approved" -> false, "shift" -> shift)
-      ).toFuture()
+      ).skip(if (offset.isDefined) offset.get else 0)
+      .limit(if (limit.isDefined) limit.get else Int.MaxValue)
+      .toFuture()
 
   def deleteOne(id: ObjectId) =
     achievementCollection.
@@ -47,15 +49,19 @@ object AchievementRepository {
         Document("_id" -> id)
       ).toFuture()
 
-  def findAllApprovedByDepartment(department: String) =
+  def findAllApprovedByDepartment(department: String, offset: Option[Int], limit: Option[Int]) =
     achievementCollection
       .find(
         Document("department" -> department, "approved" -> true)
-      ).toFuture()
+      ).skip(if (offset.isDefined) offset.get else 0)
+      .limit(if (limit.isDefined) limit.get else Int.MaxValue)
+      .toFuture()
 
-  def findAllApproved() =
+  def findAllApproved(offset: Option[Int], limit: Option[Int]) =
     achievementCollection
       .find(
         Document("approved" -> true)
-      ).toFuture()
+      ).skip(if (offset.isDefined) offset.get else 0)
+      .limit(if (limit.isDefined) limit.get else Int.MaxValue)
+      .toFuture()
 }
