@@ -30,9 +30,10 @@ object AchievementService {
   val baseStaticPath = "/mnt/data/static/"
 
   def paginate(achs: Seq[Achievement], offset: Option[Int], limit: Option[Int]): Seq[Achievement] = {
-    if (offset.isDefined && limit.isDefined) {
+    val res = if (offset.isDefined && limit.isDefined) {
       achs.toList.drop(offset.get).take(limit.get)
     } else achs
+    res.sortWith(_.date > _.date)
   }
 
   def filterByfields(
