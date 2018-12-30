@@ -36,7 +36,7 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
   import AchievementService._
 
   // /mnt/data/static
-  val baseStaticPath = "static/"
+  val baseStaticPath = "/mnt/data/static"
 
   def paginate(achs: Seq[Achievement], offset: Option[Int], limit: Option[Int]): Seq[Achievement] = {
     val sortedAchs = achs.sortWith(_.date > _.date)
@@ -261,12 +261,12 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
 
     val path = Paths.get(baseStaticPath + fileName)
     Files.write(path, imageRes.buffer)
-    val res = awsS3Service.uploadImage(path.toFile, fileName)
-    if (!res)
-      return AchievementServiceResponse(false, "Failed to upload image, try again later.")
-    ////    Files.write(outFile.toPath, imageRes.buffer)
-    //    Files.copy(file.toPath, outFile.toPath)
-    //        Files.copy(file.buffer, outFile.toPath)
+
+    //aws>>>>>
+//    val res = awsS3Service.uploadImage(path.toFile, fileName)
+//    if (!res)
+//      return AchievementServiceResponse(false, "Failed to upload image, try again later.")
+
     file.delete()
 
     achievementRepository
