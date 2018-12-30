@@ -75,9 +75,11 @@ object AchievementRoutes {
           'section.?,
           'sessionFrom.?,
           'sessionTo.?,
-          'category.?
-        ) { (rollNo, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category) =>
-          val f = AchievementService.getAllApproved(rollNo, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category)
+          'category.?,
+          'offset.as[Int].?,
+          'limit.as[Int].?
+        ) { (rollNo, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category, offset, limit) =>
+          val f = AchievementService.getAllApproved(rollNo, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category, offset, limit)
           complete(StatusCodes.OK, f.map(r => r))
         }
       } ~ (path("unapproved") & get) {
@@ -91,9 +93,11 @@ object AchievementRoutes {
           'section.?,
           'sessionFrom.?,
           'sessionTo.?,
-          'category.?
-        ) { (token, rollNo, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category)=>
-          complete(StatusCodes.OK, AchievementService.getAllUnapproved(token, rollNo, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category))
+          'category.?,
+          'offset.as[Int].?,
+          'limit.as[Int].?
+        ) { (token, rollNo, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category, offset, limit)=>
+          complete(StatusCodes.OK, AchievementService.getAllUnapproved(token, rollNo, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category, offset, limit))
         }
       }
     }

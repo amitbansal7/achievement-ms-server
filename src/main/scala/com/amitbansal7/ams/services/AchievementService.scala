@@ -29,6 +29,13 @@ object AchievementService {
   // /mnt/data/static
   val baseStaticPath = "static/"
 
+  def paginate(achs: Seq[Achievement], offset: Option[Int], limit: Option[Int]): Seq[Achievement] = {
+    val sortedAchs = achs.sortWith(_.date > _.date)
+    if (offset.isDefined && limit.isDefined) {
+      sortedAchs.toList.drop(offset.get).take(limit.get)
+    } else sortedAchs
+  }
+
   def filterByfields(
     achs: Future[Seq[Achievement]],
     rollno: Option[String],
@@ -47,7 +54,7 @@ object AchievementService {
         a: Achievement <- achss;
         if ((!rollno.isDefined || (rollno.isDefined && rollno.get == a.rollNo)) &&
           (!semester.isDefined || (semester.isDefined && semester.get.equals(a.semester))) &&
-          (!dateFrom.isDefined || (semester.isDefined && dateFrom.get <= a.date)) &&
+          (!dateFrom.isDefined || (dateFrom.isDefined && dateFrom.get <= a.date)) &&
           (!dateTo.isDefined || (dateTo.isDefined && dateTo.get >= a.date)) &&
           (!shift.isDefined || (shift.isDefined && shift.get.equals(a.shift))) &&
           (!section.isDefined || (section.isDefined && section.get.equals(a.section))) &&
@@ -68,16 +75,23 @@ object AchievementService {
     section: Option[String],
     sessionFrom: Option[String],
     sessionTo: Option[String],
-    category: Option[String]
+    category: Option[String],
+    offset: Option[Int],
+    limit: Option[Int]
   ): Future[Seq[Achievement]] = {
 
-    department match {
-      case Some(dept) => filterByfields(
-        AchievementRepository.findAllApprovedByDepartment(dept.toLowerCase), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
-      )
+    val result = department match {
+      case Some(dept) =>
+        filterByfields(
+          AchievementRepository.findAllApprovedByDepartment(dept.toLowerCase), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
+        )
       case None => filterByfields(
-        AchievementRepository.findAllApproved(), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
+        AchievementRepository.findAllApproved(offset, limit), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
       )
+    }
+
+    result.map { d =>
+      paginate(d, offset, limit)
     }
   }
 
@@ -169,7 +183,9 @@ object AchievementService {
     section: Option[String],
     sessionFrom: Option[String],
     sessionTo: Option[String],
-    category: Option[String]
+    category: Option[String],
+    offset: Option[Int],
+    limit: Option[Int]
   ) = {
     UserService.getUserFromToken(token).map {
       case Some(user) =>
@@ -178,7 +194,7 @@ object AchievementService {
           .map(d => filterByfields(Future(d), rollno, None, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category))
           .flatMap(identity)
 
-        data.map(d => AchievementServiceResponseToken(true, d))
+        data.map(d => AchievementServiceResponseToken(true, paginate(d, offset, limit)))
       case None => Future(AchievementServiceResponseToken(false, List()))
     }
   }

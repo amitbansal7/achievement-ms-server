@@ -53,7 +53,7 @@ object AchievementRepository {
         Document("department" -> department, "approved" -> true)
       ).toFuture()
 
-  def findAllApproved() =
+  def findAllApproved(offset: Option[Int], limit: Option[Int]) =
     achievementCollection
       .find(
         Document("approved" -> true)
