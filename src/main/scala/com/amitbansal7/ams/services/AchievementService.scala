@@ -27,7 +27,7 @@ import scala.util.{ Failure, Random, Success }
 object AchievementService {
 
   // /mnt/data/static
-  val baseStaticPath = "/mnt/data/static/"
+  val baseStaticPath = "static/"
 
   def paginate(achs: Seq[Achievement], offset: Option[Int], limit: Option[Int]): Seq[Achievement] = {
     val sortedAchs = achs.sortWith(_.date > _.date)
@@ -252,7 +252,9 @@ object AchievementService {
 
     val path = Paths.get(baseStaticPath + fileName)
     Files.write(path, imageRes.buffer)
-
+    val res = AwsS3Service.uploadImage(path.toFile, fileName)
+    if(!res)
+      return AchievementServiceResponse(false, "Failed to upload image, try again later.")
     ////    Files.write(outFile.toPath, imageRes.buffer)
     //    Files.copy(file.toPath, outFile.toPath)
     //        Files.copy(file.buffer, outFile.toPath)

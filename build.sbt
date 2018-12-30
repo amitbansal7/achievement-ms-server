@@ -23,6 +23,7 @@ lazy val root = (project in file(".")).
 
       "org.mongodb.scala" %% "mongo-scala-driver" % "2.4.2",
       "commons-codec" % "commons-codec" % "1.9",
-      "com.pauldijou" %% "jwt-core" % "0.18.0"
+      "com.pauldijou" %% "jwt-core" % "0.18.0",
+      "com.amazonaws" % "aws-java-sdk-s3" % "1.11.464"
     )
   )
