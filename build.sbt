@@ -24,6 +24,10 @@ lazy val root = (project in file(".")).
       "org.mongodb.scala" %% "mongo-scala-driver" % "2.4.2",
       "commons-codec" % "commons-codec" % "1.9",
       "com.pauldijou" %% "jwt-core" % "0.18.0",
-      "com.amazonaws" % "aws-java-sdk-s3" % "1.11.464"
+      "com.amazonaws" % "aws-java-sdk-s3" % "1.11.464",
+      "com.softwaremill.macwire" %% "macros" % "2.3.1" % "provided",
+      "com.softwaremill.macwire" %% "macrosakka" % "2.3.1" % "provided",
+      "com.softwaremill.macwire" %% "util" % "2.3.1",
+      "com.softwaremill.macwire" %% "proxy" % "2.3.1"
     )
-  )
+)

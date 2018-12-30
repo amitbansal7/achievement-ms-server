@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import com.amitbansal.ams.config.JsonSupport._
 import com.amitbansal7.ams.services.AcademicService
 
-object AcademicRoutes {
+class AcademicRoutes(academicService: AcademicService) {
 
   def route = {
     pathPrefix("academic") {
@@ -19,15 +19,15 @@ object AcademicRoutes {
           'token,
           'category
         ) { (rollNo, name, batch, programme, token, category) =>
-            complete(AcademicService.add(rollNo, name, batch, programme, category, token))
+            complete(academicService.add(rollNo, name, batch, programme, category, token))
           }
       } ~ (path("delete") & post) {
         formField('id, 'token) { (id, token) =>
-          complete(AcademicService.deleteOne(id, token))
+          complete(academicService.deleteOne(id, token))
         }
       } ~ (path("getall") & get) {
         parameter('programme.?, 'batch.?, 'category.?) { (programme, batch, category) =>
-          complete(AcademicService.getAll(programme, batch, category))
+          complete(academicService.getAll(programme, batch, category))
         }
       } ~ (path("edit") & put) {
         formField(
@@ -39,7 +39,7 @@ object AcademicRoutes {
           'token,
           'category
         ) { (id, rollNo, name, batch, programme, token, category) =>
-            complete(AcademicService.edit(id, rollNo, name, batch, programme, category, token))
+            complete(academicService.edit(id, rollNo, name, batch, programme, category, token))
           }
       }
     }

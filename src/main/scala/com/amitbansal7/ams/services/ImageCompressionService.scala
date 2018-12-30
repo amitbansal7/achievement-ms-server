@@ -14,7 +14,7 @@ import javax.imageio.ImageWriter
 import java.awt.Dimension
 import java.nio.file.Files
 
-object ImageCompressionService {
+class ImageCompressionService {
 
   def processImage(file: File): CompressedResult = {
     try {

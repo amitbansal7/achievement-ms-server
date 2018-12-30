@@ -7,7 +7,6 @@ import com.amitbansal.ams.Application
 import com.amazonaws.services.s3.{ AmazonS3Client, AmazonS3ClientBuilder }
 
 object AwsS3Service {
-
   val credentials: AWSCredentials = new BasicAWSCredentials(
     Application.resource.getOrElse("Access Key ID", "error").toString,
     Application.resource.getOrElse("Secret Access Key", "error").toString
@@ -20,6 +19,10 @@ object AwsS3Service {
     .withCredentials(new AWSStaticCredentialsProvider(credentials))
     .withRegion(region)
     .build();
+}
+
+class AwsS3Service {
+  import AwsS3Service._
 
   def uploadImage(file: File, name: String): Boolean = {
     try {

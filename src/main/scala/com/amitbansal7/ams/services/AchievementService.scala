@@ -15,16 +15,25 @@ import akka.http.scaladsl.server.directives.FileInfo
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
 import com.amitbansal.ams.services.UserService
-import com.amitbansal7.ams.services.AchievementService.{ AchievementServiceResponseToken }
+import com.amitbansal7.ams.services.AchievementService.AchievementServiceResponseToken
 import org.mongodb.scala.bson.ObjectId
 import pdi.jwt.{ Jwt, JwtAlgorithm }
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
+
 import scala.util.parsing.json.JSON
 import scala.util.{ Failure, Random, Success }
 
 object AchievementService {
+  case class AchievementServiceResponse(bool: Boolean, message: String)
+
+  case class AchievementServiceResponseToken(bool: Boolean, data: Seq[Achievement])
+}
+
+class AchievementService(userService: UserService, achievementRepository: AchievementRepository, awsS3Service: AwsS3Service, imageCompressionService: ImageCompressionService, utils: Utils, userRepository: UserRepository) {
+
+  import AchievementService._
 
   // /mnt/data/static
   val baseStaticPath = "static/"
@@ -83,10 +92,10 @@ object AchievementService {
     val result = department match {
       case Some(dept) =>
         filterByfields(
-          AchievementRepository.findAllApprovedByDepartment(dept.toLowerCase), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
+          achievementRepository.findAllApprovedByDepartment(dept.toLowerCase), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
         )
       case None => filterByfields(
-        AchievementRepository.findAllApproved(offset, limit), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
+        achievementRepository.findAllApproved(offset, limit), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
       )
     }
 
@@ -96,23 +105,23 @@ object AchievementService {
   }
 
   def toggleApproved(id: String, token: String, action: Boolean): Future[AchievementServiceResponse] = {
-    val objId = Utils.checkObjectId(id)
+    val objId = utils.checkObjectId(id)
 
     if (!objId.isDefined)
       return Future {
         AchievementServiceResponse(false, "Invalid Id")
       }
 
-    val ach: Future[Achievement] = AchievementRepository.findById(objId.get)
-    val user: Future[Option[User]] = UserService.getUserFromToken(token)
+    val ach: Future[Achievement] = achievementRepository.findById(objId.get)
+    val user: Future[Option[User]] = userService.getUserFromToken(token)
 
     user.map {
       case Some(u) =>
         ach.map(a =>
           if (a.isInstanceOf[Achievement] && a.department == u.department && u.shift == a.shift) {
             if (action)
-              AchievementRepository.approveByUser(objId.get, u._id.toHexString)
-            else AchievementRepository.approve(objId.get, action)
+              achievementRepository.approveByUser(objId.get, u._id.toHexString)
+            else achievementRepository.approve(objId.get, action)
 
             AchievementServiceResponse(true, "Done")
           } else {
@@ -128,21 +137,21 @@ object AchievementService {
 
   def deleteAch(id: String, token: String): Future[AchievementServiceResponse] = {
 
-    val objId = Utils.checkObjectId(id)
+    val objId = utils.checkObjectId(id)
 
     if (!objId.isDefined)
       return Future {
         AchievementServiceResponse(false, "Invalid Id")
       }
 
-    val user: Future[Option[User]] = UserService.getUserFromToken(token)
-    val ach: Future[Achievement] = AchievementRepository.findById(objId.get)
+    val user: Future[Option[User]] = userService.getUserFromToken(token)
+    val ach: Future[Achievement] = achievementRepository.findById(objId.get)
 
     user.map {
       case Some(u) =>
         ach.map(a =>
           if (a.isInstanceOf[Achievement] && a.department == u.department && a.shift == u.shift) {
-            AchievementRepository.deleteOne(objId.get)
+            achievementRepository.deleteOne(objId.get)
             AchievementServiceResponse(true, "Done")
           } else {
             AchievementServiceResponse(false, "Access denied")
@@ -153,13 +162,13 @@ object AchievementService {
   }
 
   def getOne(id: String): Option[Future[Achievement]] = {
-    val objId = Utils.checkObjectId(id)
+    val objId = utils.checkObjectId(id)
     if (!objId.isDefined) None
     else {
-      val ach = AchievementRepository.findById(objId.get)
+      val ach = achievementRepository.findById(objId.get)
       val res: Future[Achievement] = ach.map {
         case a: Achievement if a.approved =>
-          val user: Future[User] = UserRepository.getById(Utils.checkObjectId(a.approvedBy.get).get)
+          val user: Future[User] = userRepository.getById(utils.checkObjectId(a.approvedBy.get).get)
           user.map { u =>
             if (u != null) Achievement.apply(a, Some(u.email))
             else Achievement.apply(a, None)
@@ -187,9 +196,9 @@ object AchievementService {
     offset: Option[Int],
     limit: Option[Int]
   ) = {
-    UserService.getUserFromToken(token).map {
+    userService.getUserFromToken(token).map {
       case Some(user) =>
-        val data = AchievementRepository
+        val data = achievementRepository
           .findAllByUnApprovedDepartmentAndDepartment(user.department, user.shift)
           .map(d => filterByfields(Future(d), rollno, None, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category))
           .flatMap(identity)
@@ -237,7 +246,7 @@ object AchievementService {
     if (!meta.contentType.toString().startsWith("image"))
       return AchievementServiceResponse(false, "Invalid file type")
 
-    val imageRes = ImageCompressionService.processImage(file)
+    val imageRes = imageCompressionService.processImage(file)
 
     //    if (!imageRes.bool)
     //      return AchievementServiceResponse(false, imageRes.message)
@@ -252,22 +261,17 @@ object AchievementService {
 
     val path = Paths.get(baseStaticPath + fileName)
     Files.write(path, imageRes.buffer)
-    val res = AwsS3Service.uploadImage(path.toFile, fileName)
-    if(!res)
+    val res = awsS3Service.uploadImage(path.toFile, fileName)
+    if (!res)
       return AchievementServiceResponse(false, "Failed to upload image, try again later.")
     ////    Files.write(outFile.toPath, imageRes.buffer)
     //    Files.copy(file.toPath, outFile.toPath)
     //        Files.copy(file.buffer, outFile.toPath)
     file.delete()
 
-    AchievementRepository
+    achievementRepository
       .addAchievement(Achievement.apply(title, rollNo, department, semester, date, shift, section, sessionFrom, sessionTo, venue, category, participated, name, fileName, description, eventName))
 
     AchievementServiceResponse(true, "Achievement successfully added")
   }
-
-  case class AchievementServiceResponse(bool: Boolean, message: String)
-
-  case class AchievementServiceResponseToken(bool: Boolean, data: Seq[Achievement])
-
 }

@@ -2,7 +2,7 @@ package com.amitbansal7.ams.services
 
 import org.mongodb.scala.bson.ObjectId
 
-object Utils {
+class Utils {
 
   def checkObjectId(id: String): Option[ObjectId] = {
     try {

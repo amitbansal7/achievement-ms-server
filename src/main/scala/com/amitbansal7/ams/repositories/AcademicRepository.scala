@@ -5,7 +5,7 @@ import com.amitbansal7.ams.models.Academic
 import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.bson.collection.mutable.Document
 
-object AcademicRepository {
+class AcademicRepository {
 
   val academicCollection = MongoConfig.getAcademicCollection
 

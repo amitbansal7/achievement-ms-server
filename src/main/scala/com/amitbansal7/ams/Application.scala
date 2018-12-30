@@ -42,12 +42,14 @@ object Application extends CORSHandler {
 
     implicit val timeout = Timeout(5 seconds)
 
+    import com.amitbansal7.ams.Modules._
+
     val route: Route = corsHandler {
       toStrictEntity(30 seconds) {
         (path("") & get) {
           complete(StatusCodes.OK, "Server is up and running..")
         } ~
-          AchievementRoutes.route ~ UserRoutes.route ~ AcademicRoutes.route
+          achievementRoutes.route ~ userRoutes.route ~ academicRoutes.route
       }
     }
 
