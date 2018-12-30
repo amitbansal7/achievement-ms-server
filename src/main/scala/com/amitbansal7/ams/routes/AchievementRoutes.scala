@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 import scala.reflect.io.File
 import scala.util.{Failure, Success}
 
-object AchievementRoutes {
+class AchievementRoutes(achievementService: AchievementService) {
   def route: Route = {
     pathPrefix("achievements") {
       (path("add") & post) {
@@ -40,24 +40,24 @@ object AchievementRoutes {
             case (meta, file) =>
               complete(
                 StatusCodes.OK,
-                AchievementService.addAchievement(title, rollNo, department, semester, date, shift, section, sessionFrom, sessionTo, venue, category, participated, name, description, eventName, file, meta)
+                achievementService.addAchievement(title, rollNo, department, semester, date, shift, section, sessionFrom, sessionTo, venue, category, participated, name, description, eventName, file, meta)
               )
           }
         }
       } ~ (path("approve") & post) {
         parameter('id, 'token) { (id, token) =>
-          complete(StatusCodes.OK, AchievementService.approveAch(id, token))
+          complete(StatusCodes.OK, achievementService.approveAch(id, token))
         }
       } ~ (path("unapprove") & post) {
         parameter('id, 'token) { (id, token) =>
-          complete(StatusCodes.OK, AchievementService.unApproveAch(id, token))
+          complete(StatusCodes.OK, achievementService.unApproveAch(id, token))
         }
       } ~ (path("delete") & post) {
         parameter('id, 'token) { (id, token) =>
-          complete(StatusCodes.OK, AchievementService.deleteAch(id, token))
+          complete(StatusCodes.OK, achievementService.deleteAch(id, token))
         }
       } ~ (path("get" / Segment) & get) { id =>
-        val res = AchievementService.getOne(id)
+        val res = achievementService.getOne(id)
 
         if (!res.isDefined) complete(StatusCodes.NotFound)
         else onSuccess(res.get){
@@ -79,7 +79,7 @@ object AchievementRoutes {
           'offset.as[Int].?,
           'limit.as[Int].?
         ) { (rollNo, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category, offset, limit) =>
-          val f = AchievementService.getAllApproved(rollNo, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category, offset, limit)
+          val f = achievementService.getAllApproved(rollNo, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category, offset, limit)
           complete(StatusCodes.OK, f.map(r => r))
         }
       } ~ (path("unapproved") & get) {
@@ -97,7 +97,7 @@ object AchievementRoutes {
           'offset.as[Int].?,
           'limit.as[Int].?
         ) { (token, rollNo, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category, offset, limit)=>
-          complete(StatusCodes.OK, AchievementService.getAllUnapproved(token, rollNo, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category, offset, limit))
+          complete(StatusCodes.OK, achievementService.getAllUnapproved(token, rollNo, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category, offset, limit))
         }
       }
     }

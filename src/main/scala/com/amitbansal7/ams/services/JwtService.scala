@@ -5,7 +5,7 @@ import pdi.jwt.{ Jwt, JwtAlgorithm, JwtClaim }
 
 import scala.concurrent.duration._
 
-object JwtService {
+class JwtService {
 
   val secretKey = Application.resource.getOrElse("jwtKey", "error").toString
 
@@ -20,6 +20,6 @@ object JwtService {
   }
 
   def decodeToken(token: String) = {
-    Jwt.decodeRawAll(token, JwtService.secretKey, Seq(JwtAlgorithm.HS384))
+    Jwt.decodeRawAll(token, secretKey, Seq(JwtAlgorithm.HS384))
   }
 }

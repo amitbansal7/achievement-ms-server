@@ -11,7 +11,7 @@ import org.mongodb.scala.result
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
 
-object AchievementRepository {
+class AchievementRepository {
 
   val achievementCollection = MongoConfig.getachievementCollection
 

@@ -8,7 +8,7 @@ import org.mongodb.scala.model.Filters._
 
 import scala.concurrent.Future
 
-object UserRepository {
+class UserRepository {
 
   val userCollection = MongoConfig.getUserCollection
 
