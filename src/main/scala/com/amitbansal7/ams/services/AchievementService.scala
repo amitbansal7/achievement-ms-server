@@ -248,8 +248,8 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
 
     val imageRes = imageCompressionService.processImage(file)
 
-    //    if (!imageRes.bool)
-    //      return AchievementServiceResponse(false, imageRes.message)
+    if (!imageRes.bool)
+      return AchievementServiceResponse(false, imageRes.message)
 
     val str = Random
       .alphanumeric
