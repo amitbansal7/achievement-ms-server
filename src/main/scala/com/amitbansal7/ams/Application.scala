@@ -49,7 +49,7 @@ object Application extends CORSHandler {
         (path("") & get) {
           complete(StatusCodes.OK, "Server is up and running..")
         } ~
-          achievementRoutes.route ~ userRoutes.route ~ academicRoutes.route
+          achievementRoutes.route ~ userRoutes.route ~ academicRoutes.route ~ tAchievementRoutes.route
       }
     }
 
@@ -60,10 +60,10 @@ object Application extends CORSHandler {
       case Failure(e) => println(s"could not start application: {}", e.getMessage)
     }
 
-    //    StdIn.readLine()
-    //    bindingFuture.flatMap(_.unbind())
-    //    system.terminate()
-    //    println("Server is closed.")
+    StdIn.readLine()
+    bindingFuture.flatMap(_.unbind())
+    system.terminate()
+    println("Server is closed.")
 
   }
 }

@@ -6,10 +6,11 @@ import akka.http.scaladsl.model.{ ContentType, HttpEntity, MediaTypes }
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.services.UserService
 import com.amitbansal.ams.services.UserService.{ AuthRes, UserData }
-import com.amitbansal7.ams.models.{ Academic, Achievement }
+import com.amitbansal7.ams.models.{ Academic, Achievement, TAchievement }
 import com.amitbansal7.ams.services.AcademicService.AcademicServiceResponse
 import com.amitbansal7.ams.services.{ AcademicService, AchievementService }
 import com.amitbansal7.ams.services.AchievementService.AchievementServiceResponseToken
+import com.amitbansal7.ams.services.TAchievementService.TAchievementServiceResponse
 import org.mongodb.scala.bson.ObjectId
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 
@@ -30,6 +31,9 @@ object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val AcademicServiceResp = jsonFormat2(AcademicServiceResponse)
   implicit val AchievementServiceResponseTokenFormat = jsonFormat2(AchievementServiceResponseToken)
   implicit val UserDataFormat = jsonFormat5(UserData)
+  implicit val tAchievementFormat = jsonFormat7(TAchievement.apply)
+  implicit val tAchievementServiceResponse = jsonFormat2(TAchievementServiceResponse.apply)
+
   implicit val mapMarshaller: ToEntityMarshaller[Map[String, Any]] = Marshaller.opaque { map =>
     HttpEntity(ContentType(MediaTypes.`application/json`), map.toString)
   }

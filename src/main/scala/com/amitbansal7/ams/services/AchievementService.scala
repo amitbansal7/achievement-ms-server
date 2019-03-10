@@ -263,9 +263,9 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
     Files.write(path, imageRes.buffer)
 
     //aws>>>>>
-//    val res = awsS3Service.uploadImage(path.toFile, fileName)
-//    if (!res)
-//      return AchievementServiceResponse(false, "Failed to upload image, try again later.")
+    //    val res = awsS3Service.uploadImage(path.toFile, fileName)
+    //    if (!res)
+    //      return AchievementServiceResponse(false, "Failed to upload image, try again later.")
 
     file.delete()
 
