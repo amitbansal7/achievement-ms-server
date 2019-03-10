@@ -10,7 +10,9 @@ class TAchievementRoutes(tAchievementService: TAchievementService) {
   def route: Route = {
     pathPrefix("tachievements") {
       (path("all") & get) {
-        complete(tAchievementService.getAll())
+        parameter('token.?) { (token) =>
+          complete(tAchievementService.getAll(token))
+        }
       } ~ (path("add") & post) {
         formField(
           'token,

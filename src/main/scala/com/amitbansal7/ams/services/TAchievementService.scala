@@ -1,5 +1,6 @@
 package com.amitbansal7.ams.services
 
+import com.amitbansal.ams.models.User
 import com.amitbansal.ams.services.UserService
 import com.amitbansal7.ams.models.TAchievement
 import com.amitbansal7.ams.repositories.TAchievementRepository
@@ -15,7 +16,7 @@ object TAchievementService {
 
 }
 
-class TAchievementService(tachievementRepository: TAchievementRepository, userService: UserService) {
+class TAchievementService(tachievementRepository: TAchievementRepository, userService: UserService, utils: Utils) {
 
   def add(token: String, taType: String, date: String, description: String, msi: Boolean, international: Boolean): Future[TAchievementServiceResponse] = {
 
@@ -33,6 +34,15 @@ class TAchievementService(tachievementRepository: TAchievementRepository, userSe
     }
   }
 
-  def getAll() = tachievementRepository.getAll
+  def getAllByToken(token: String): Future[Seq[TAchievement]] = userService.getUserFromToken(token).map {
+    case Some(user) => tachievementRepository.getAllByToken(user._id)
+    case None => tachievementRepository.getAll
+  }.flatMap(identity)
+
+  def getAll(token: Option[String]): Future[Seq[TAchievement]] =
+    token match {
+      case Some(token) => getAllByToken(token)
+      case None => tachievementRepository.getAll
+    }
 
 }
