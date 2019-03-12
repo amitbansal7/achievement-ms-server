@@ -9,10 +9,30 @@ import com.amitbansal.ams.config.JsonSupport._
 class TAchievementRoutes(tAchievementService: TAchievementService) {
   def route: Route = {
     pathPrefix("tachievements") {
-      (path("all") & get) {
-        parameter('token.?) { (token) =>
-          complete(tAchievementService.getAll(token))
+      (path("allUserid") & get) {
+        parameter('userId) { (userId) =>
+          complete(tAchievementService.getAllForUserId(userId))
         }
+      } ~ (path("all") & get) {
+        parameter('fromDate.?, 'toDate.?, 'department.?) { (fromDate, toDate, department) =>
+          complete(tAchievementService.getAll(fromDate, toDate, department))
+        }
+      } ~ (path("delete") & delete) {
+        parameter('id, 'token) { (id, token) =>
+          complete(tAchievementService.deleteOne(id, token))
+        }
+      } ~ (path("update") & put) {
+        formField(
+          'token,
+          'id,
+          'taType,
+          'date,
+          'description,
+          'msi.as[Boolean],
+          'international.as[Boolean]
+        ) { (token, id, taType, date, description, msi, international) =>
+            complete(tAchievementService.update(token, id, taType, date, description, msi, international))
+          }
       } ~ (path("add") & post) {
         formField(
           'token,

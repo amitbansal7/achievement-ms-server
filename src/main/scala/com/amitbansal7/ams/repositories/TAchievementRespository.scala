@@ -15,9 +15,34 @@ class TAchievementRepository {
   def getAll =
     tAchievementsCollection.find().toFuture()
 
-  def getAllByToken(userId: ObjectId) =
+  def getAllByUserId(userId: ObjectId) =
     tAchievementsCollection
       .find(Document("user" -> userId))
       .toFuture()
 
+  def deleteOne(id: ObjectId) =
+    tAchievementsCollection
+      .deleteOne(Document("_id" -> id))
+      .toFuture()
+
+  def update(id: ObjectId, tAchievement: TAchievement) =
+    tAchievementsCollection.updateOne(
+      Document("_id" -> id),
+      Document(
+        "$set" ->
+          Document(
+            "taType" -> tAchievement.taType,
+            "date" -> tAchievement.date,
+            "description" -> tAchievement.description,
+            "msi" -> tAchievement.msi,
+            "international" -> tAchievement.international
+          )
+      )
+    ).toFuture()
+
+  def getOneById(id: ObjectId) =
+    tAchievementsCollection
+      .find(Document("_id" -> id))
+      .first()
+      .toFuture()
 }

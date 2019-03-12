@@ -7,10 +7,11 @@ object TAchievement {
   val taTypes = Set(
     "PaperPublishedInJournal",
     "PaperPublishedInConferenceProceedings",
-    "FDPAttended",
-    "ConferenceAttended",
-    "SeminarAttended",
-    "PaperPresentedInSeminarConference"
+    "FdpConferenceSeminarAttended",
+    "PaperPresentedInSeminarConference",
+    "OneWeekFDPAttended",
+    "PaperPresentedInSeminarConference",
+    "Books"
   )
 
   def apply(
@@ -34,6 +35,7 @@ object TAchievement {
 }
 
 import TAchievement._
+
 //Teacher achievement object
 case class TAchievement(
     _id: ObjectId,

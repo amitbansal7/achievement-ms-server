@@ -35,4 +35,6 @@ class UserRepository {
       Document("$set" -> Document("email" -> newEmail, "firstName" -> firstName, "lastName" -> lastName))
     ).toFuture()
 
+  def getAllUsers() =
+    userCollection.find().toFuture()
 }
