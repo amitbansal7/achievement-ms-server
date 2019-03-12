@@ -6,6 +6,7 @@ import com.amitbansal.ams.repositories.UserRepository
 import com.amitbansal7.ams.models.Achievement
 import com.amitbansal7.ams.services.AchievementService.AchievementServiceResponse
 import com.amitbansal7.ams.services.{ AchievementService, JwtService }
+import org.mongodb.scala.bson.ObjectId
 
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, Future }
@@ -16,7 +17,7 @@ import pdi.jwt.{ Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtOptions }
 import scala.util.parsing.json.JSON
 
 object UserService {
-  case class UserData(email: String, firstName: String, lastName: String, department: String, shift: String)
+  case class UserData(id: ObjectId, email: String, firstName: String, lastName: String, department: String, shift: String)
 
   case class UserServiceResponse(bool: Boolean, message: String)
 
@@ -68,7 +69,7 @@ class UserService(userRepository: UserRepository, jwtService: JwtService) {
   def isUserValid(token: String): Future[Option[UserData]] = {
     val userF = getUserFromToken(token)
     userF.map {
-      case Some(user) => Some(UserData(user.email, user.firstName, user.lastName, user.department, user.shift))
+      case Some(user) => Some(UserData(user._id, user.email, user.firstName, user.lastName, user.department, user.shift))
       case None => None
     }
   }

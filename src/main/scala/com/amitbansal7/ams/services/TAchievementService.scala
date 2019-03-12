@@ -4,6 +4,7 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
 import com.amitbansal.ams.services.UserService
+import com.amitbansal.ams.services.UserService.UserData
 import com.amitbansal7.ams.models.TAchievement
 import com.amitbansal7.ams.repositories.TAchievementRepository
 import com.amitbansal7.ams.services.TAchievementService.{TAchievementServiceData, TAchievementServiceResponse}
@@ -16,7 +17,7 @@ object TAchievementService {
 
   case class TAchievementServiceResponse(bool: Boolean, message: String)
 
-  case class TAchievementServiceData(bool: Boolean, data: Seq[TAchievement])
+  case class TAchievementServiceData(bool: Boolean, user: Option[UserData], achs: Seq[TAchievement])
 
 }
 
@@ -69,10 +70,19 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
     }.flatMap(identity)
   }
 
-  def getAllForUserId(userId: String): Future[TAchievementServiceData] = utils.checkObjectId(userId) match {
-    case Some(objId) => tAchievementRepository.getAllByUserId(objId).map(d => TAchievementServiceData(true, d))
-    case None => Future {
-      TAchievementServiceData(false, List[TAchievement]())
+  def getAllForUserId(userId: String): Future[TAchievementServiceData] = {
+    utils.checkObjectId(userId) match {
+      case Some(objId) =>
+        val user = userRepository.getById(objId).map { u =>
+          if (u != null)
+            Some(UserData(u._id, u.email, u.firstName, u.lastName, u.department, u.shift))
+          else None
+        }
+        user.map(u => tAchievementRepository.getAllByUserId(objId).map(d => TAchievementServiceData(u.isDefined, u, d))).flatMap(identity)
+
+      case None => Future {
+        TAchievementServiceData(false, None, List[TAchievement]())
+      }
     }
   }
 
