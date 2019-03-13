@@ -14,8 +14,8 @@ class TAchievementRoutes(tAchievementService: TAchievementService) {
           complete(tAchievementService.getAllForUserId(userId))
         }
       } ~ (path("all") & get) {
-        parameter('fromDate.?, 'toDate.?, 'department.?) { (fromDate, toDate, department) =>
-          complete(tAchievementService.getAll(fromDate, toDate, department))
+        parameter('fromDate.?, 'toDate.?) { (fromDate, toDate) =>
+          complete(tAchievementService.getAll(fromDate, toDate))
         }
       } ~ (path("delete") & delete) {
         parameter('id, 'token) { (id, token) =>

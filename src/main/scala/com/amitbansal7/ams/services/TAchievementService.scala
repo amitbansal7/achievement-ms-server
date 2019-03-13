@@ -7,17 +7,24 @@ import com.amitbansal.ams.services.UserService
 import com.amitbansal.ams.services.UserService.UserData
 import com.amitbansal7.ams.models.TAchievement
 import com.amitbansal7.ams.repositories.TAchievementRepository
-import com.amitbansal7.ams.services.TAchievementService.{TAchievementServiceData, TAchievementServiceResponse}
+import com.amitbansal7.ams.services.TAchievementService._
 import org.mongodb.scala.bson.ObjectId
 
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ Await, Future }
 
 object TAchievementService {
 
   case class TAchievementServiceResponse(bool: Boolean, message: String)
 
   case class TAchievementServiceData(bool: Boolean, user: Option[UserData], achs: Seq[TAchievement])
+
+  case class TAchAllRes(user: UserData, data: Map[String, TAchLocations])
+
+  case class TAchLocations(msi: TAchNatInt, others: TAchNatInt)
+
+  case class TAchNatInt(int: Int, nat: Int)
 
 }
 
@@ -88,13 +95,56 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
 
   def filterAll(fromDate: Option[String], toDate: Option[String], department: Option[String]) = ???
 
-  def getAll(fromDate: Option[String], toDate: Option[String], department: Option[String]): Future[Seq[TAchievement]] = {
-    //    val allUsers = userRepository.getAllUsers()
+  def evalForOneUser(user: User, data: List[(String, Seq[TAchievement])]): TAchAllRes = {
 
-    val allTachs = tAchievementRepository.getAll
-    //    val temp: String = allTachs.map(seq => seq.groupBy(_.user))
-    //    println(allTachs.map(seq => seq.groupBy(_.user)).asInstanceOf[Map[String, Seq[TAchievement]]])
-    allTachs
+    //(taType, TAchLocations)
+    val mappedData = data.map { unit =>
+      val (msi, others) = unit._2.partition(_.msi)
+      val msiNatInt = msi.partition(_.international)
+      val othersNatInt = others.partition(_.international)
+      val msiLocations = TAchNatInt(msiNatInt._1.size, msiNatInt._2.size)
+      val otherLocations = TAchNatInt(othersNatInt._1.size, othersNatInt._2.size)
+      (unit._1, TAchLocations(msiLocations, otherLocations))
+    }.toMap
+
+    TAchAllRes(
+      UserData(user._id, user.email, user.firstName, user.lastName, user.department, user.shift),
+      mappedData
+    )
+  }
+
+  def getAll(fromDate: Option[String], toDate: Option[String]) = {
+
+    val allUsers = userRepository
+      .getAllUsers()
+
+    val userIdToUserMap = allUsers.map(users => users.map { user =>
+      (user._id, user)
+    }.toMap)
+
+    val allTachs = tAchievementRepository.getAll.map { future =>
+      future.filter { ach =>
+        (!fromDate.isDefined || (fromDate.isDefined && ach.date >= fromDate.get)) &&
+          (!toDate.isDefined || (toDate.isDefined && ach.date <= toDate.get))
+      }
+    }
+
+    val groupedByUser = allTachs.map(d => d.groupBy(_.user).toList)
+
+    val groupedByUserAndTaType = groupedByUser.map { future =>
+      future.map { data => //(userId, Seq[Tachs])
+        (data._1, data._2.groupBy(_.taType).toList)
+      }
+    }
+
+    userIdToUserMap.map { map =>
+      groupedByUserAndTaType.map { future =>
+        future.map { grouped => //(userId, (taType, Seq[Achs]))
+          evalForOneUser(map.get(grouped._1).get, grouped._2)
+        }
+      }
+    }
+
   }
 
   def checkIfTAchBelongsToThisUser(tAch: Future[TAchievement], user: User): Future[Boolean] =
@@ -112,13 +162,12 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
     }
 
     userFromToken.map {
-      case Some(user) => checkIfTAchBelongsToThisUser(tAchById, user) map { res =>
-        if (res) {
+      case Some(user) => checkIfTAchBelongsToThisUser(tAchById, user) map {
+        case true =>
           tAchievementRepository.deleteOne(objId.get)
           TAchievementServiceResponse(true, "Deletion Successful")
-        } else {
+        case false =>
           TAchievementServiceResponse(false, "Access Denied")
-        }
       }
       case None =>
         Future {
