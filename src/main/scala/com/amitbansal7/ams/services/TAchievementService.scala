@@ -12,7 +12,7 @@ import org.mongodb.scala.bson.ObjectId
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.{Await, Future}
 
 object TAchievementService {
 
@@ -92,8 +92,6 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
       }
     }
   }
-
-  def filterAll(fromDate: Option[String], toDate: Option[String], department: Option[String]) = ???
 
   def evalForOneUser(user: User, data: List[(String, Seq[TAchievement])]): TAchAllRes = {
 
