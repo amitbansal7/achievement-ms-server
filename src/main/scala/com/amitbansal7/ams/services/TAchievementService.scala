@@ -20,7 +20,9 @@ object TAchievementService {
 
   case class TAchievementServiceData(bool: Boolean, user: Option[UserData], achs: Seq[TAchievement])
 
-  case class TAchAllRes(user: UserData, data: Map[String, TAchLocations])
+  case class TAchAggRes(user: UserData, data: Map[String, TAchLocations])
+
+  case class TAchAllRes(email: String, firstName: String, lastName: String, department: String, shift: String, achievements: Seq[TAchievement])
 
   case class TAchLocations(msi: TAchNatInt, others: TAchNatInt)
 
@@ -93,7 +95,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
     }
   }
 
-  def evalForOneUser(user: User, data: List[(String, Seq[TAchievement])]): TAchAllRes = {
+  def evalForOneUser(user: User, data: List[(String, Seq[TAchievement])]): TAchAggRes = {
 
     //(taType, TAchLocations)
     val mappedData = data.map { unit =>
@@ -105,13 +107,42 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
       (unit._1, TAchLocations(msiLocations, otherLocations))
     }.toMap
 
-    TAchAllRes(
+    TAchAggRes(
       UserData(user._id, user.email, user.firstName, user.lastName, user.department, user.shift),
       mappedData
     )
   }
 
-  def getAll(fromDate: Option[String], toDate: Option[String]) = {
+  def getAll(fromDate: Option[String], toDate: Option[String], department: Option[String]): Future[Seq[TAchAllRes]] = {
+
+    val allAchsFuture: Future[Seq[TAchievement]] = tAchievementRepository.getAll()
+    val allAchsGroupedByUserFuture = allAchsFuture.map { all =>
+      all.flatMap { ach =>
+        if ((!fromDate.isDefined || (ach.date >= fromDate.get)) &&
+          (!toDate.isDefined || (ach.date <= toDate.get))) List(ach)
+        else List[TAchievement]()
+      }
+    }.map {
+      all => all.groupBy(ach => ach.user)
+    }
+
+    val allUsersFuture = userRepository.getAllUsers()
+    val allUsersFilteredByDeptFuture = allUsersFuture.map { users =>
+      if (department.isDefined) users.filter(_.department == department.get)
+      else users
+    }
+
+    val res = for {
+      users <- allUsersFilteredByDeptFuture
+      allAch <- allAchsGroupedByUserFuture
+    } yield users.map { user =>
+      TAchAllRes(user.email, user.firstName, user.lastName, user.department, user.shift, allAch.getOrElse(user._id, List[TAchievement]()))
+    }
+
+    return res
+  }
+
+  def getAllAggregated(fromDate: Option[String], toDate: Option[String]) = {
 
     val allUsers = userRepository
       .getAllUsers()

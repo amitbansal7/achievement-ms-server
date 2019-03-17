@@ -5,6 +5,8 @@ import com.amitbansal7.ams.models.TAchievement
 import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.bson.collection.mutable.Document
 
+import scala.concurrent.Future
+
 class TAchievementRepository {
 
   val tAchievementsCollection = MongoConfig.getTAchievementsCollection
@@ -12,7 +14,7 @@ class TAchievementRepository {
   def add(tAchievement: TAchievement) =
     tAchievementsCollection.insertOne(tAchievement).toFuture()
 
-  def getAll =
+  def getAll(): Future[Seq[TAchievement]] =
     tAchievementsCollection.find().toFuture()
 
   def getAllByUserId(userId: ObjectId) =

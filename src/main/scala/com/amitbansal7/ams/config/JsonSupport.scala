@@ -36,7 +36,8 @@ object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val tAchievementServiceDataFormat = jsonFormat3(TAchievementServiceData.apply)
   implicit val nnatIntFormat = jsonFormat2(TAchNatInt)
   implicit val tAchLocationsFormat = jsonFormat2(TAchLocations)
-  implicit val tAchAllResUnitFormat = jsonFormat2(TAchAllRes)
+  implicit val tAchAllResUnitFormat = jsonFormat2(TAchAggRes)
+  implicit val tAchAllResFormat = jsonFormat6(TAchAllRes)
 
   implicit val mapMarshaller: ToEntityMarshaller[Map[String, Any]] = Marshaller.opaque { map =>
     HttpEntity(ContentType(MediaTypes.`application/json`), map.toString)

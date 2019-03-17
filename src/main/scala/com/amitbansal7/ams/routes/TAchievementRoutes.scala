@@ -13,9 +13,13 @@ class TAchievementRoutes(tAchievementService: TAchievementService) {
         parameter('userId) { (userId) =>
           complete(tAchievementService.getAllForUserId(userId))
         }
-      } ~ (path("all") & get) {
+      } ~ (path("allagg") & get) {
         parameter('fromDate.?, 'toDate.?) { (fromDate, toDate) =>
-          complete(tAchievementService.getAll(fromDate, toDate))
+          complete(tAchievementService.getAllAggregated(fromDate, toDate))
+        }
+      } ~ (path("all") & get) {
+        parameter('fromDate.?, 'toDate.?, 'department.?) { (fromDate, toDate, department) =>
+          complete(tAchievementService.getAll(fromDate, toDate, department))
         }
       } ~ (path("delete") & delete) {
         parameter('id, 'token) { (id, token) =>
