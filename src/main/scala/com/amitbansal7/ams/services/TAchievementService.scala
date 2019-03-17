@@ -12,7 +12,7 @@ import org.mongodb.scala.bson.ObjectId
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 
 object TAchievementService {
 
@@ -132,14 +132,18 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
       else users
     }
 
-    val res = for {
+    val allUsersWithAchs = for {
       users <- allUsersFilteredByDeptFuture
       allAch <- allAchsGroupedByUserFuture
     } yield users.map { user =>
       TAchAllRes(user.email, user.firstName, user.lastName, user.department, user.shift, allAch.getOrElse(user._id, List[TAchievement]()))
     }
 
-    return res
+    val allUsersWithAtleastOneAch = allUsersWithAchs.map {
+      all => all.filter(_.achievements.size > 0)
+    }
+
+    return allUsersWithAtleastOneAch
   }
 
   def getAllAggregated(fromDate: Option[String], toDate: Option[String]) = {
