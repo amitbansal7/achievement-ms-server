@@ -22,7 +22,7 @@ object TAchievementService {
 
   case class TAchAggRes(user: UserData, data: Map[String, TAchLocations])
 
-  case class TAchAllRes(email: String, firstName: String, lastName: String, department: String, shift: String, achievements: Seq[TAchievement])
+  case class TAchAllRes(id: ObjectId, email: String, firstName: String, lastName: String, department: String, shift: String, achievements: Seq[TAchievement])
 
   case class TAchLocations(msi: TAchNatInt, others: TAchNatInt)
 
@@ -136,7 +136,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
       users <- allUsersFilteredByDeptFuture
       allAch <- allAchsGroupedByUserFuture
     } yield users.map { user =>
-      TAchAllRes(user.email, user.firstName, user.lastName, user.department, user.shift, allAch.getOrElse(user._id, List[TAchievement]()))
+      TAchAllRes(user._id, user.email, user.firstName, user.lastName, user.department, user.shift, allAch.getOrElse(user._id, List[TAchievement]()))
     }
 
     val allUsersWithAtleastOneAch = allUsersWithAchs.map {

@@ -37,11 +37,11 @@ object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val nnatIntFormat = jsonFormat2(TAchNatInt)
   implicit val tAchLocationsFormat = jsonFormat2(TAchLocations)
   implicit val tAchAllResUnitFormat = jsonFormat2(TAchAggRes)
-  implicit val tAchAllResFormat = jsonFormat6(TAchAllRes)
+  implicit val tAchAllResFormat = jsonFormat7(TAchAllRes)
 
-  implicit val mapMarshaller: ToEntityMarshaller[Map[String, Any]] = Marshaller.opaque { map =>
-    HttpEntity(ContentType(MediaTypes.`application/json`), map.toString)
-  }
+  //  implicit val mapMarshaller: ToEntityMaTAchAllResrshaller[Map[String, Any]] = Marshaller.opaque { map =>
+  //    HttpEntity(ContentType(MediaTypes.`application/json`), map.toString)
+  //  }
 
   //  class EnumJsonConverter[T <: scala.Enumeration](enu: T) extends RootJsonFormat[T#Value]{
   //    override def write(obj: T#Value): JsValue = JsString(obj.toString)
