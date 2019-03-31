@@ -11,7 +11,7 @@ object TAchievement {
     "PaperPresentedInSeminarConference",
     "OneWeekFDPAttended",
     "PaperPresentedInSeminarConference",
-    "Books"
+    "Book"
   )
 
   def apply(
