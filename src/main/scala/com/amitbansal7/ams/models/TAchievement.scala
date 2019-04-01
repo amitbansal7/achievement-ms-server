@@ -18,20 +18,28 @@ object TAchievement {
     _id: ObjectId,
     user: ObjectId,
     taType: String,
+    international: Boolean,
+    topic: String,
+    published: String,
+    sponsored: Option[Boolean],
+    reviewed: Option[Boolean],
     date: String,
-    description: String,
-    msi: Boolean,
-    international: Boolean // (international = True) (national = False)
-  ): TAchievement = new TAchievement(_id, user, taType, date, description, msi, international)
+    description: Option[String],
+    msi: Boolean
+  ): TAchievement = new TAchievement(_id, user, taType, international, topic, published, sponsored, reviewed, date, description, msi)
 
   def apply(
     user: ObjectId,
     taType: String,
+    international: Boolean,
+    topic: String,
+    published: String,
+    sponsored: Option[Boolean],
+    reviewed: Option[Boolean],
     date: String,
-    description: String,
-    msi: Boolean,
-    international: Boolean // (international = True) (national = False)
-  ): TAchievement = new TAchievement(new ObjectId(), user, taType, date, description, msi, international)
+    description: Option[String],
+    msi: Boolean
+  ): TAchievement = new TAchievement(new ObjectId(), user, taType, international, topic, published, sponsored, reviewed, date, description, msi)
 }
 
 import TAchievement._
@@ -41,10 +49,14 @@ case class TAchievement(
     _id: ObjectId,
     user: ObjectId,
     taType: String,
+    international: Boolean, // (international = True) (national = False).
+    topic: String,
+    published: String, //[Name of publisher, Place, Presented at, Presented At]
+    sponsored: Option[Boolean],
+    reviewed: Option[Boolean],
     date: String,
-    description: String,
-    msi: Boolean,
-    international: Boolean // (international = True) (national = False)
+    description: Option[String],
+    msi: Boolean
 ) {
 
 }

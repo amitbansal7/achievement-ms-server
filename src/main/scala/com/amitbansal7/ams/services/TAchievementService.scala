@@ -12,7 +12,7 @@ import org.mongodb.scala.bson.ObjectId
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.{Await, Future}
 
 object TAchievementService {
 
@@ -32,7 +32,18 @@ object TAchievementService {
 
 class TAchievementService(tAchievementRepository: TAchievementRepository, userService: UserService, utils: Utils, userRepository: UserRepository) {
 
-  def add(token: String, taType: String, date: String, description: String, msi: Boolean, international: Boolean): Future[TAchievementServiceResponse] = {
+  def add(
+    token: String,
+    taType: String,
+    international: Boolean,
+    topic: String,
+    published: String,
+    sponsored: Option[Boolean],
+    reviewed: Option[Boolean],
+    date: String,
+    description: Option[String],
+    msi: Boolean,
+  ): Future[TAchievementServiceResponse] = {
 
     if (!TAchievement.taTypes.contains(taType))
       return Future {
@@ -41,14 +52,26 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
     else {
       userService.getUserFromToken(token).map {
         case Some(user) =>
-          tAchievementRepository.add(TAchievement(user._id, taType, date, description, msi, international))
+          tAchievementRepository.add(TAchievement(user._id, taType, international, topic, published, sponsored, reviewed, date, description, msi))
           TAchievementServiceResponse(true, "Successfully added.")
         case None => TAchievementServiceResponse(false, "Access Denied")
       }
     }
   }
 
-  def update(token: String, id: String, taType: String, date: String, description: String, msi: Boolean, international: Boolean): Future[TAchievementServiceResponse] = {
+  def update(
+    token: String,
+    id: String,
+    taType: String,
+    international: Boolean,
+    topic: String,
+    published: String,
+    sponsored: Option[Boolean],
+    reviewed: Option[Boolean],
+    date: String,
+    description: Option[String],
+    msi: Boolean,
+  ): Future[TAchievementServiceResponse] = {
 
     val objId = utils.checkObjectId(id)
 
@@ -67,7 +90,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
         case Some(user) =>
           checkIfTAchBelongsToThisUser(tAchFromId, user) map {
             case true =>
-              tAchievementRepository.update(objId.get, TAchievement(objId.get, user._id, taType, date, description, msi, international))
+              tAchievementRepository.update(objId.get, TAchievement(user._id, taType, international, topic, published, sponsored, reviewed, date, description, msi))
               TAchievementServiceResponse(true, "Successfully updated.")
             case false =>
               TAchievementServiceResponse(false, "Access Denied")

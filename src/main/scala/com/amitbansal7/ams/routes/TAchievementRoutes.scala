@@ -36,25 +36,33 @@ class TAchievementRoutes(tAchievementService: TAchievementService) {
           'token,
           'id,
           'taType,
+          'international.as[Boolean],
+          'topic,
+          'published,
+          'sponsored.as[Boolean].?,
+          'reviewed.as[Boolean].?,
           'date,
-          'description,
+          'description.?,
           'msi.as[Boolean],
-          'international.as[Boolean]
-        ) { (token, id, taType, date, description, msi, international) =>
-            complete(tAchievementService.update(token, id, taType, date, description, msi, international))
-          }
+        ) { (token, id, taType, international, topic, published, sponsored, reviewed, date, description, msi) =>
+          complete(tAchievementService.update(token, id, taType, international, topic, published, sponsored, reviewed, date, description, msi))
+        }
         //add an achievement using valid token.
       } ~ (path("add") & post) {
         formField(
           'token,
           'taType,
+          'international.as[Boolean],
+          'topic,
+          'published,
+          'sponsored.as[Boolean].?,
+          'reviewed.as[Boolean].?,
           'date,
-          'description,
+          'description.?,
           'msi.as[Boolean],
-          'international.as[Boolean]
-        ) { (token, taType, date, description, msi, international) =>
-            complete(tAchievementService.add(token, taType, date, description, msi, international))
-          }
+        ) { (token, taType, international, topic, published, sponsored, reviewed, date, description, msi) =>
+          complete(tAchievementService.add(token, taType, international, topic, published, sponsored, reviewed, date, description, msi))
+        }
       }
     }
   }

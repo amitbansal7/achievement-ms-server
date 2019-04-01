@@ -17,6 +17,7 @@ import pdi.jwt.{ Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtOptions }
 import scala.util.parsing.json.JSON
 
 object UserService {
+
   case class UserData(id: ObjectId, email: String, firstName: String, lastName: String, department: String, shift: String)
 
   case class UserServiceResponse(bool: Boolean, message: String)
@@ -26,7 +27,9 @@ object UserService {
 }
 
 class UserService(userRepository: UserRepository, jwtService: JwtService) {
+
   import UserService._
+
   val secretCode = Application.resource.getOrElse("inviteCode", "invalidCode").toString
 
   def existByEmail(email: String): Boolean = {
