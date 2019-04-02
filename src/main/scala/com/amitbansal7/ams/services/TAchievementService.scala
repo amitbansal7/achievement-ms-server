@@ -136,13 +136,15 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
     )
   }
 
-  def getAll(fromDate: Option[String], toDate: Option[String], department: Option[String]): Future[Seq[TAchAllRes]] = {
+  def getAll(fromDate: Option[String], toDate: Option[String], department: Option[String], taType: Option[String]): Future[Seq[TAchAllRes]] = {
 
     val allAchsFuture: Future[Seq[TAchievement]] = tAchievementRepository.getAll()
     val allAchsGroupedByUserFuture = allAchsFuture.map { all =>
       all.flatMap { ach =>
         if ((!fromDate.isDefined || (ach.date >= fromDate.get)) &&
-          (!toDate.isDefined || (ach.date <= toDate.get))) List(ach)
+          (!toDate.isDefined || (ach.date <= toDate.get)) &&
+          (!taType.isDefined || (ach.taType == taType.get))
+        ) List(ach)
         else List[TAchievement]()
       }
     }.map {

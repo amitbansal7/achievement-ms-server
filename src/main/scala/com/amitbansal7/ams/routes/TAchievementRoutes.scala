@@ -22,8 +22,8 @@ class TAchievementRoutes(tAchievementService: TAchievementService) {
         }
         //get all users with their achievements, optional filters: fromDate, toDate, department
       } ~ (path("all") & get) {
-        parameter('fromDate.?, 'toDate.?, 'department.?) { (fromDate, toDate, department) =>
-          complete(tAchievementService.getAll(fromDate, toDate, department))
+        parameter('fromDate.?, 'toDate.?, 'department.?, 'taType.?) { (fromDate, toDate, department, taType) =>
+          complete(tAchievementService.getAll(fromDate, toDate, department, taType))
         }
         //Delete an achievement with achievement id and valid token
       } ~ (path("delete") & delete) {
