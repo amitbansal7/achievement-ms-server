@@ -16,8 +16,8 @@
 8. Go to ```http://localhost:8080/``` and you should see "Server is up and running..".
 
 
-##### Frontend deployment : [ams](https://bitspleasemsi.github.io)
-##### API deployed on aws : [ams](http://amsmsi.com)
-##### Frontend code written in angular can be found [here](https://github.com/BitsPleaseMSI/achievement-ms-frontend)
+#### Frontend deployment : [ams](https://bitspleasemsi.github.io)
+#### API deployed on aws : [ams](http://amsmsi.com)
+#### Frontend code written in angular can be found [here](https://github.com/BitsPleaseMSI/achievement-ms-frontend)
 
 
