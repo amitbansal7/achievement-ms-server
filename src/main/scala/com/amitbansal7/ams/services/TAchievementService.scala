@@ -12,7 +12,7 @@ import org.mongodb.scala.bson.ObjectId
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 
 object TAchievementService {
 
@@ -43,6 +43,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
     date: String,
     description: Option[String],
     msi: Boolean,
+    place: Option[String]
   ): Future[TAchievementServiceResponse] = {
 
     if (!TAchievement.taTypes.contains(taType))
@@ -52,7 +53,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
     else {
       userService.getUserFromToken(token).map {
         case Some(user) =>
-          tAchievementRepository.add(TAchievement(user._id, taType, international, topic, published, sponsored, reviewed, date, description, msi))
+          tAchievementRepository.add(TAchievement(user._id, taType, international, topic, published, sponsored, reviewed, date, description, msi, place))
           TAchievementServiceResponse(true, "Successfully added.")
         case None => TAchievementServiceResponse(false, "Access Denied")
       }
@@ -71,6 +72,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
     date: String,
     description: Option[String],
     msi: Boolean,
+    place: Option[String]
   ): Future[TAchievementServiceResponse] = {
 
     val objId = utils.checkObjectId(id)
@@ -90,7 +92,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
         case Some(user) =>
           checkIfTAchBelongsToThisUser(tAchFromId, user) map {
             case true =>
-              tAchievementRepository.update(objId.get, TAchievement(user._id, taType, international, topic, published, sponsored, reviewed, date, description, msi))
+              tAchievementRepository.update(objId.get, TAchievement(user._id, taType, international, topic, published, sponsored, reviewed, date, description, msi, place))
               TAchievementServiceResponse(true, "Successfully updated.")
             case false =>
               TAchievementServiceResponse(false, "Access Denied")
@@ -143,8 +145,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
       all.flatMap { ach =>
         if ((!fromDate.isDefined || (ach.date >= fromDate.get)) &&
           (!toDate.isDefined || (ach.date <= toDate.get)) &&
-          (!taType.isDefined || (ach.taType == taType.get))
-        ) List(ach)
+          (!taType.isDefined || (ach.taType == taType.get))) List(ach)
         else List[TAchievement]()
       }
     }.map {

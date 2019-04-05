@@ -25,8 +25,9 @@ object TAchievement {
     reviewed: Option[Boolean],
     date: String,
     description: Option[String],
-    msi: Boolean
-  ): TAchievement = new TAchievement(_id, user, taType, international, topic, published, sponsored, reviewed, date, description, msi)
+    msi: Boolean,
+    place: Option[String]
+  ): TAchievement = new TAchievement(_id, user, taType, international, topic, published, sponsored, reviewed, date, description, msi, place)
 
   def apply(
     user: ObjectId,
@@ -38,8 +39,9 @@ object TAchievement {
     reviewed: Option[Boolean],
     date: String,
     description: Option[String],
-    msi: Boolean
-  ): TAchievement = new TAchievement(new ObjectId(), user, taType, international, topic, published, sponsored, reviewed, date, description, msi)
+    msi: Boolean,
+    place: Option[String]
+  ): TAchievement = new TAchievement(new ObjectId(), user, taType, international, topic, published, sponsored, reviewed, date, description, msi, place)
 }
 
 import TAchievement._
@@ -56,7 +58,8 @@ case class TAchievement(
     reviewed: Option[Boolean],
     date: String,
     description: Option[String],
-    msi: Boolean
+    msi: Boolean,
+    place: Option[String]
 ) {
 
 }
