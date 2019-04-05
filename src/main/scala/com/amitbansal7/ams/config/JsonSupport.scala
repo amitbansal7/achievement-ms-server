@@ -24,20 +24,20 @@ object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
 
   implicit val userServiceResponseFormat = jsonFormat2(UserService.UserServiceResponse)
   implicit val AchievementServiceResponseFormat = jsonFormat2(AchievementService.AchievementServiceResponse)
-  implicit val userFormat = jsonFormat7(User.apply)
+  implicit val userFormat = jsonFormat8(User.apply)
   implicit val authResFormat = jsonFormat3(AuthRes)
   implicit val AchievementFormat = jsonFormat20(Achievement.apply)
   implicit val AcademicFormat = jsonFormat6(Academic.apply)
   implicit val AcademicServiceResp = jsonFormat2(AcademicServiceResponse)
   implicit val AchievementServiceResponseTokenFormat = jsonFormat2(AchievementServiceResponseToken)
-  implicit val UserDataFormat = jsonFormat6(UserData)
+  implicit val UserDataFormat = jsonFormat7(UserData)
   implicit val tAchievementFormat = jsonFormat11(TAchievement.apply)
   implicit val tAchievementServiceResponse = jsonFormat2(TAchievementServiceResponse.apply)
   implicit val tAchievementServiceDataFormat = jsonFormat3(TAchievementServiceData.apply)
   implicit val nnatIntFormat = jsonFormat2(TAchNatInt)
   implicit val tAchLocationsFormat = jsonFormat2(TAchLocations)
   implicit val tAchAllResUnitFormat = jsonFormat2(TAchAggRes)
-  implicit val tAchAllResFormat = jsonFormat7(TAchAllRes)
+  implicit val tAchAllResFormat = jsonFormat8(TAchAllRes)
 
   //  implicit val mapMarshaller: ToEntityMaTAchAllResrshaller[Map[String, Any]] = Marshaller.opaque { map =>
   //    HttpEntity(ContentType(MediaTypes.`application/json`), map.toString)

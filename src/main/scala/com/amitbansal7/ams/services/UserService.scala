@@ -18,7 +18,7 @@ import scala.util.parsing.json.JSON
 
 object UserService {
 
-  case class UserData(id: ObjectId, email: String, firstName: String, lastName: String, department: String, shift: String)
+  case class UserData(id: ObjectId, email: String, firstName: String, lastName: String, department: String, shift: String, designation: String)
 
   case class UserServiceResponse(bool: Boolean, message: String)
 
@@ -37,13 +37,13 @@ class UserService(userRepository: UserRepository, jwtService: JwtService) {
     user != null
   }
 
-  def reset(email: String, newEmail: String, firstName: String, lastName: String, password: String) = {
+  def reset(email: String, newEmail: String, firstName: String, lastName: String, password: String, designation: String) = {
     userRepository.getByEmail(email).map {
       case user: User if user.password == User.getPasshash(password) =>
         if (email != newEmail && existByEmail(newEmail)) {
           UserServiceResponse(false, s"Email(${newEmail}) already in use")
         } else {
-          userRepository.reset(email, newEmail, firstName, lastName)
+          userRepository.reset(email, newEmail, firstName, lastName, designation)
           UserServiceResponse(true, "Profile successfully saved")
         }
       case _ => UserServiceResponse(false, "Email or password doesn't match")
@@ -72,7 +72,7 @@ class UserService(userRepository: UserRepository, jwtService: JwtService) {
   def isUserValid(token: String): Future[Option[UserData]] = {
     val userF = getUserFromToken(token)
     userF.map {
-      case Some(user) => Some(UserData(user._id, user.email, user.firstName, user.lastName, user.department, user.shift))
+      case Some(user) => Some(UserData(user._id, user.email, user.firstName, user.lastName, user.department, user.shift, user.designation))
       case None => None
     }
   }
@@ -97,7 +97,8 @@ class UserService(userRepository: UserRepository, jwtService: JwtService) {
     lastName: String,
     code: String,
     department: String,
-    shift: String
+    shift: String,
+    designation: String
   ): UserServiceResponse = {
     if (code != secretCode)
       return UserServiceResponse(false, s"Secret code doesn't match")
@@ -111,7 +112,7 @@ class UserService(userRepository: UserRepository, jwtService: JwtService) {
     if (existByEmail(email))
       return UserServiceResponse(false, s"User with email ${email} already exists")
     else {
-      userRepository.addUser(User.apply(email, password, firstName, lastName, department, shift))
+      userRepository.addUser(User.apply(email, password, firstName, lastName, department, shift, designation))
       UserServiceResponse(true, "Account successfully created")
     }
   }

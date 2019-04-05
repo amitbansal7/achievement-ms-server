@@ -22,7 +22,7 @@ object TAchievementService {
 
   case class TAchAggRes(user: UserData, data: Map[String, TAchLocations])
 
-  case class TAchAllRes(id: ObjectId, email: String, firstName: String, lastName: String, department: String, shift: String, achievements: Seq[TAchievement])
+  case class TAchAllRes(id: ObjectId, email: String, firstName: String, lastName: String, department: String, shift: String, designation: String, achievements: Seq[TAchievement])
 
   case class TAchLocations(msi: TAchNatInt, others: TAchNatInt)
 
@@ -107,7 +107,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
       case Some(objId) =>
         val user = userRepository.getById(objId).map { u =>
           if (u != null)
-            Some(UserData(u._id, u.email, u.firstName, u.lastName, u.department, u.shift))
+            Some(UserData(u._id, u.email, u.firstName, u.lastName, u.department, u.shift, u.designation))
           else None
         }
         user.map(u => tAchievementRepository.getAllByUserId(objId).map(d => TAchievementServiceData(u.isDefined, u, d))).flatMap(identity)
@@ -131,7 +131,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
     }.toMap
 
     TAchAggRes(
-      UserData(user._id, user.email, user.firstName, user.lastName, user.department, user.shift),
+      UserData(user._id, user.email, user.firstName, user.lastName, user.department, user.shift, user.designation),
       mappedData
     )
   }
@@ -161,7 +161,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
       users <- allUsersFilteredByDeptFuture
       allAch <- allAchsGroupedByUserFuture
     } yield users.map { user =>
-      TAchAllRes(user._id, user.email, user.firstName, user.lastName, user.department, user.shift, allAch.getOrElse(user._id, List[TAchievement]()))
+      TAchAllRes(user._id, user.email, user.firstName, user.lastName, user.department, user.shift, user.designation, allAch.getOrElse(user._id, List[TAchievement]()))
     }
 
     val allUsersWithAtleastOneAch = allUsersWithAchs.map {

@@ -29,10 +29,16 @@ class UserRepository {
       Document("$set" -> Document("password" -> newPass))
     ).toFuture()
 
-  def reset(email: String, newEmail: String, firstName: String, lastName: String) =
+  def reset(email: String, newEmail: String, firstName: String, lastName: String, designation: String) =
     userCollection.updateOne(
       Document("email" -> email),
-      Document("$set" -> Document("email" -> newEmail, "firstName" -> firstName, "lastName" -> lastName))
+      Document("$set" ->
+        Document(
+          "email" -> newEmail,
+          "firstName" -> firstName,
+          "lastName" -> lastName,
+          "designation" -> designation
+        ))
     ).toFuture()
 
   def getAllUsers() =

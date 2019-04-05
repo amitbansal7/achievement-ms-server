@@ -24,9 +24,10 @@ class UserRoutes(userService: UserService) {
           'code,
           'department,
           'shift,
+          'designation
         ) {
-            (email, password, firstName, lastName, code, department, shift) =>
-              complete(StatusCodes.OK, userService.addUser(email.toLowerCase, password, firstName, lastName, code, department, shift))
+            (email, password, firstName, lastName, code, department, shift, designation) =>
+              complete(StatusCodes.OK, userService.addUser(email.toLowerCase, password, firstName, lastName, code, department, shift, designation))
           }
       } ~
         (path("auth") & post) {
@@ -40,8 +41,8 @@ class UserRoutes(userService: UserService) {
           }
         } ~
         (path("reset") & put) {
-          formField('firstName, 'lastName, 'email, 'password, 'newEmail) { (firstName, lastName, email, password, newEmail) =>
-            complete(StatusCodes.OK, userService.reset(email.toLowerCase, newEmail.toLowerCase, firstName, lastName, password))
+          formField('firstName, 'lastName, 'email, 'password, 'newEmail, 'designation) { (firstName, lastName, email, password, newEmail, designation) =>
+            complete(StatusCodes.OK, userService.reset(email.toLowerCase, newEmail.toLowerCase, firstName, lastName, password, designation))
           }
         } ~
         (path("isvalid") & get) {
