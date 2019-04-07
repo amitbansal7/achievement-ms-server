@@ -5,13 +5,10 @@ import org.mongodb.scala.bson.ObjectId
 object TAchievement {
 
   val taTypes = Set(
-    "PaperPublishedInJournal",
-    "PaperPublishedInConferenceProceedings",
-    "FdpConferenceSeminarAttended",
-    "PaperPresentedInSeminarConference",
-    "OneWeekFDPAttended",
-    "PaperPresentedInSeminarConference",
-    "Book"
+    "Book",
+    "Journal",
+    "Conference",
+    "SeminarAttended"
   )
 
   def apply(
