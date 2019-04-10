@@ -35,6 +35,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
   def add(
     token: String,
     taType: String,
+    subType: Option[String],
     international: Boolean,
     topic: String,
     published: String,
@@ -50,20 +51,25 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
       return Future {
         TAchievementServiceResponse(false, "Invalid Type")
       }
-    else {
-      userService.getUserFromToken(token).map {
-        case Some(user) =>
-          tAchievementRepository.add(TAchievement(user._id, taType, international, topic, published, sponsored, reviewed, date, description, msi, place))
-          TAchievementServiceResponse(true, "Successfully added.")
-        case None => TAchievementServiceResponse(false, "Access Denied")
+    if (subType.isDefined && !TAchievement.subTypes.contains(subType.get)) {
+      return Future {
+        TAchievementServiceResponse(false, "Invalid sub Type")
       }
     }
+    userService.getUserFromToken(token).map {
+      case Some(user) =>
+        tAchievementRepository.add(TAchievement(user._id, taType, subType, international, topic, published, sponsored, reviewed, date, description, msi, place))
+        TAchievementServiceResponse(true, "Successfully added.")
+      case None => TAchievementServiceResponse(false, "Access Denied")
+    }
+
   }
 
   def update(
     token: String,
     id: String,
     taType: String,
+    subType: Option[String],
     international: Boolean,
     topic: String,
     published: String,
@@ -83,6 +89,12 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
 
     val tAchFromId = tAchievementRepository.getOneById(objId.get)
 
+    if (subType.isDefined && !TAchievement.subTypes.contains(subType.get)) {
+      return Future {
+        TAchievementServiceResponse(false, "Invalid sub Type")
+      }
+    }
+
     if (!TAchievement.taTypes.contains(taType))
       return Future {
         TAchievementServiceResponse(false, "Invalid Type")
@@ -92,7 +104,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
         case Some(user) =>
           checkIfTAchBelongsToThisUser(tAchFromId, user) map {
             case true =>
-              tAchievementRepository.update(objId.get, TAchievement(user._id, taType, international, topic, published, sponsored, reviewed, date, description, msi, place))
+              tAchievementRepository.update(objId.get, TAchievement(user._id, taType, subType, international, topic, published, sponsored, reviewed, date, description, msi, place))
               TAchievementServiceResponse(true, "Successfully updated.")
             case false =>
               TAchievementServiceResponse(false, "Access Denied")

@@ -11,10 +11,19 @@ object TAchievement {
     "SeminarAttended"
   )
 
+  val subTypes = Set(
+    "SEMINAR",
+    "CONFERENCE",
+    "WORKSHOP",
+    "FDP",
+    "FDP1WEEK"
+  )
+
   def apply(
     _id: ObjectId,
     user: ObjectId,
     taType: String,
+    subType: Option[String],
     international: Boolean,
     topic: String,
     published: String,
@@ -24,11 +33,12 @@ object TAchievement {
     description: Option[String],
     msi: Boolean,
     place: Option[String]
-  ): TAchievement = new TAchievement(_id, user, taType, international, topic, published, sponsored, reviewed, date, description, msi, place)
+  ): TAchievement = new TAchievement(_id, user, taType, subType, international, topic, published, sponsored, reviewed, date, description, msi, place)
 
   def apply(
     user: ObjectId,
     taType: String,
+    subType: Option[String],
     international: Boolean,
     topic: String,
     published: String,
@@ -38,7 +48,7 @@ object TAchievement {
     description: Option[String],
     msi: Boolean,
     place: Option[String]
-  ): TAchievement = new TAchievement(new ObjectId(), user, taType, international, topic, published, sponsored, reviewed, date, description, msi, place)
+  ): TAchievement = new TAchievement(new ObjectId(), user, taType, subType, international, topic, published, sponsored, reviewed, date, description, msi, place)
 }
 
 import TAchievement._
@@ -48,6 +58,7 @@ case class TAchievement(
     _id: ObjectId,
     user: ObjectId,
     taType: String,
+    subType: Option[String],
     international: Boolean, // (international = True) (national = False).
     topic: String,
     published: String, //[Name of publisher, Place, Presented at, Presented At]
