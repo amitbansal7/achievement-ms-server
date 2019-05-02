@@ -221,16 +221,17 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
   def checkIfTAchBelongsToThisUser(tAch: Future[TAchievement], user: User): Future[Boolean] =
     for {
       tAch <- tAch
-    } yield (user._id == tAch.user)
+    } yield (tAch != null && user._id == tAch.user)
 
   def deleteOne(id: String, token: String): Future[TAchievementServiceResponse] = {
     val userFromToken = userService.getUserFromToken(token)
     val objId = utils.checkObjectId(id)
-    val tAchById = tAchievementRepository.getOneById(objId.get)
 
     if (!objId.isDefined) return Future {
       TAchievementServiceResponse(false, "Invalid id")
     }
+
+    val tAchById = tAchievementRepository.getOneById(objId.get)
 
     userFromToken.map {
       case Some(user) => checkIfTAchBelongsToThisUser(tAchById, user) map {
