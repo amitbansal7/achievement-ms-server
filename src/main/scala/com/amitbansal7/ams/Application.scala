@@ -60,10 +60,10 @@ object Application extends CORSHandler {
       case Failure(e) => println(s"could not start application: {}", e.getMessage)
     }
 
-    StdIn.readLine()
-    bindingFuture.flatMap(_.unbind())
-    system.terminate()
-    println("Server is closed.")
+//    StdIn.readLine()
+//    bindingFuture.flatMap(_.unbind())
+//    system.terminate()
+//    println("Server is closed.")
 
   }
 }
