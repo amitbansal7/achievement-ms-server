@@ -36,7 +36,7 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
   import AchievementService._
 
   // /mnt/data/static
-  val baseStaticPath = "/mnt/data/static"
+  val baseStaticPath = "/mnt/data/static/"
 
   def paginate(achs: Seq[Achievement], offset: Option[Int], limit: Option[Int]): Seq[Achievement] = {
     val sortedAchs = achs.sortWith(_.date > _.date)
