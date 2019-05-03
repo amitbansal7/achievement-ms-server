@@ -25,7 +25,12 @@ object Application extends CORSHandler {
 
   val port = 8080
 
-  val json = JSON.parseFull(scala.io.Source.fromResource("data.json").getLines().toList.mkString)
+  val json = JSON.parseFull(
+    scala.io.Source.fromResource("data.json")
+      .getLines()
+      .toList
+      .mkString
+  )
 
   val resource = json.map {
     case map: Map[String, String] => map
