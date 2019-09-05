@@ -21,14 +21,17 @@ import pdi.jwt.{ Jwt, JwtAlgorithm }
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
-
+import cats.data.OptionT
+import cats.instances.future._
 import scala.util.parsing.json.JSON
 import scala.util.{ Failure, Random, Success }
 
 object AchievementService {
+
   case class AchievementServiceResponse(bool: Boolean, message: String)
 
   case class AchievementServiceResponseToken(bool: Boolean, data: Seq[Achievement])
+
 }
 
 class AchievementService(userService: UserService, achievementRepository: AchievementRepository, awsS3Service: AwsS3Service, imageCompressionService: ImageCompressionService, utils: Utils, userRepository: UserRepository) {
@@ -88,19 +91,16 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
     offset: Option[Int],
     limit: Option[Int]
   ): Future[Seq[Achievement]] = {
-
-    val result = department match {
-      case Some(dept) =>
-        filterByfields(
-          achievementRepository.findAllApprovedByDepartment(dept.toLowerCase), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
-        )
-      case None => filterByfields(
+    department.map { dept =>
+      filterByfields(
+        achievementRepository.findAllApprovedByDepartment(dept.toLowerCase), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
+      )
+    }.getOrElse {
+      filterByfields(
         achievementRepository.findAllApproved(offset, limit), rollno, department, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category
       )
-    }
-
-    result.map { d =>
-      paginate(d, offset, limit)
+    }.map {
+      paginate(_, offset, limit)
     }
   }
 
@@ -162,10 +162,8 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
   }
 
   def getOne(id: String): Option[Future[Achievement]] = {
-    val objId = utils.checkObjectId(id)
-    if (!objId.isDefined) None
-    else {
-      val ach = achievementRepository.findById(objId.get)
+    utils.checkObjectId(id).map { oId =>
+      val ach = achievementRepository.findById(oId)
       val res: Future[Achievement] = ach.map {
         case a: Achievement if a.approved =>
           val user: Future[User] = userRepository.getById(utils.checkObjectId(a.approvedBy.get).get)
@@ -178,8 +176,7 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
         }
       }.flatMap(identity)
       Some(res)
-
-    }
+    }.getOrElse(None)
   }
 
   def getAllUnapproved(
@@ -196,15 +193,15 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
     offset: Option[Int],
     limit: Option[Int]
   ) = {
-    userService.getUserFromToken(token).map {
-      case Some(user) =>
-        val data = achievementRepository
-          .findAllByUnApprovedDepartmentAndDepartment(user.department, user.shift)
-          .map(d => filterByfields(Future(d), rollno, None, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category))
-          .flatMap(identity)
+    OptionT(userService.getUserFromToken(token)).map { user =>
+      val data = achievementRepository
+        .findAllByUnApprovedDepartmentAndDepartment(user.department, user.shift)
+        .map(d => filterByfields(Future(d), rollno, None, semester, dateFrom, dateTo, shift, section, sessionFrom, sessionTo, category))
+        .flatMap(identity)
 
-        data.map(d => AchievementServiceResponseToken(true, paginate(d, offset, limit)))
-      case None => Future(AchievementServiceResponseToken(false, List()))
+      data.map(d => AchievementServiceResponseToken(true, paginate(d, offset, limit)))
+    }.getOrElse {
+      Future(AchievementServiceResponseToken(false, List()))
     }
   }
 

@@ -1,6 +1,7 @@
 package com.amitbansal7.ams.services
 
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import cats.data.OptionT
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
 import com.amitbansal.ams.services.UserService
@@ -9,7 +10,7 @@ import com.amitbansal7.ams.models.TAchievement
 import com.amitbansal7.ams.repositories.TAchievementRepository
 import com.amitbansal7.ams.services.TAchievementService._
 import org.mongodb.scala.bson.ObjectId
-
+import cats.implicits._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Await, Future }
@@ -56,13 +57,12 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
         TAchievementServiceResponse(false, "Invalid sub Type")
       }
     }
-    userService.getUserFromToken(token).map {
-      case Some(user) =>
-        tAchievementRepository.add(TAchievement(user._id, taType, subType, international, topic, published, sponsored, reviewed, date, description, msi, place))
-        TAchievementServiceResponse(true, "Successfully added.")
-      case None => TAchievementServiceResponse(false, "Access Denied")
+    OptionT(userService.getUserFromToken(token)).map { user =>
+      tAchievementRepository.add(TAchievement(user._id, taType, subType, international, topic, published, sponsored, reviewed, date, description, msi, place))
+      TAchievementServiceResponse(true, "Successfully added.")
+    }.getOrElse {
+      TAchievementServiceResponse(false, "Access Denied")
     }
-
   }
 
   def update(
@@ -96,7 +96,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
     }
 
     if (!TAchievement.taTypes.contains(taType))
-      return Future {
+      Future {
         TAchievementServiceResponse(false, "Invalid Type")
       }
     else {
@@ -117,16 +117,15 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
   }
 
   def getAllForUserId(userId: String): Future[TAchievementServiceData] = {
-    utils.checkObjectId(userId) match {
-      case Some(objId) =>
-        val user = userRepository.getById(objId).map { u =>
-          if (u != null)
-            Some(UserData(u._id, u.email, u.firstName, u.lastName, u.department, u.shift, u.designation))
-          else None
-        }
-        user.map(u => tAchievementRepository.getAllByUserId(objId).map(d => TAchievementServiceData(u.isDefined, u, d))).flatMap(identity)
-
-      case None => Future {
+    utils.checkObjectId(userId).map { objId =>
+      val user = userRepository.getById(objId).map { u =>
+        if (u != null)
+          Some(UserData(u._id, u.email, u.firstName, u.lastName, u.department, u.shift, u.designation))
+        else None
+      }
+      user.map(u => tAchievementRepository.getAllByUserId(objId).map(d => TAchievementServiceData(u.isDefined, u, d))).flatMap(identity)
+    }.getOrElse {
+      Future {
         TAchievementServiceData(false, None, List[TAchievement]())
       }
     }
@@ -135,13 +134,14 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
   def evalForOneUser(user: User, data: List[(String, Seq[TAchievement])]): TAchAggRes = {
 
     //(taType, TAchLocations)
-    val mappedData = data.map { unit =>
-      val (msi, others) = unit._2.partition(_.msi)
-      val msiNatInt = msi.partition(_.international)
-      val othersNatInt = others.partition(_.international)
-      val msiLocations = TAchNatInt(msiNatInt._1.size, msiNatInt._2.size)
-      val otherLocations = TAchNatInt(othersNatInt._1.size, othersNatInt._2.size)
-      (unit._1, TAchLocations(msiLocations, otherLocations))
+    val mappedData = data.map {
+      unit =>
+        val (msi, others) = unit._2.partition(_.msi)
+        val msiNatInt = msi.partition(_.international)
+        val othersNatInt = others.partition(_.international)
+        val msiLocations = TAchNatInt(msiNatInt._1.size, msiNatInt._2.size)
+        val otherLocations = TAchNatInt(othersNatInt._1.size, othersNatInt._2.size)
+        (unit._1, TAchLocations(msiLocations, otherLocations))
     }.toMap
 
     TAchAggRes(
@@ -153,28 +153,33 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
   def getAll(fromDate: Option[String], toDate: Option[String], department: Option[String], taType: Option[String]): Future[Seq[TAchAllRes]] = {
 
     val allAchsFuture: Future[Seq[TAchievement]] = tAchievementRepository.getAll()
-    val allAchsGroupedByUserFuture = allAchsFuture.map { all =>
-      all.flatMap { ach =>
-        if ((!fromDate.isDefined || (ach.date >= fromDate.get)) &&
-          (!toDate.isDefined || (ach.date <= toDate.get)) &&
-          (!taType.isDefined || (ach.taType == taType.get))) List(ach)
-        else List[TAchievement]()
-      }
+
+    val allAchsGroupedByUserFuture = allAchsFuture.map {
+      all =>
+        all.flatMap {
+          ach =>
+            if ((!fromDate.isDefined || (ach.date >= fromDate.get)) &&
+              (!toDate.isDefined || (ach.date <= toDate.get)) &&
+              (!taType.isDefined || (ach.taType == taType.get))) List(ach)
+            else List[TAchievement]()
+        }
     }.map {
       all => all.groupBy(ach => ach.user)
     }
 
     val allUsersFuture = userRepository.getAllUsers()
-    val allUsersFilteredByDeptFuture = allUsersFuture.map { users =>
-      if (department.isDefined) users.filter(_.department == department.get)
-      else users
+    val allUsersFilteredByDeptFuture = allUsersFuture.map {
+      users =>
+        if (department.isDefined) users.filter(_.department == department.get)
+        else users
     }
 
     val allUsersWithAchs = for {
       users <- allUsersFilteredByDeptFuture
       allAch <- allAchsGroupedByUserFuture
-    } yield users.map { user =>
-      TAchAllRes(user._id, user.email, user.firstName, user.lastName, user.department, user.shift, user.designation, allAch.getOrElse(user._id, List[TAchievement]()))
+    } yield users.map {
+      user =>
+        TAchAllRes(user._id, user.email, user.firstName, user.lastName, user.department, user.shift, user.designation, allAch.getOrElse(user._id, List[TAchievement]()))
     }
 
     val allUsersWithAtleastOneAch = allUsersWithAchs.map {
@@ -189,31 +194,39 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
     val allUsers = userRepository
       .getAllUsers()
 
-    val userIdToUserMap = allUsers.map(users => users.map { user =>
-      (user._id, user)
+    val userIdToUserMap = allUsers.map(users => users.map {
+      user =>
+        (user._id, user)
     }.toMap)
 
-    val allTachs = tAchievementRepository.getAll.map { future =>
-      future.filter { ach =>
-        (!fromDate.isDefined || (fromDate.isDefined && ach.date >= fromDate.get)) &&
-          (!toDate.isDefined || (toDate.isDefined && ach.date <= toDate.get))
-      }
+    val allTachs = tAchievementRepository.getAll.map {
+      future =>
+        future.filter {
+          ach =>
+            (!fromDate.isDefined || (fromDate.isDefined && ach.date >= fromDate.get)) &&
+              (!toDate.isDefined || (toDate.isDefined && ach.date <= toDate.get))
+        }
     }
 
     val groupedByUser = allTachs.map(d => d.groupBy(_.user).toList)
 
-    val groupedByUserAndTaType = groupedByUser.map { future =>
-      future.map { data => //(userId, Seq[Tachs])
-        (data._1, data._2.groupBy(_.taType).toList)
-      }
+    val groupedByUserAndTaType = groupedByUser.map {
+      future =>
+        future.map {
+          data => //(userId, Seq[Tachs])
+            (data._1, data._2.groupBy(_.taType).toList)
+        }
     }
 
-    userIdToUserMap.map { map =>
-      groupedByUserAndTaType.map { future =>
-        future.map { grouped => //(userId, (taType, Seq[Achs]))
-          evalForOneUser(map.get(grouped._1).get, grouped._2)
+    userIdToUserMap.map {
+      map =>
+        groupedByUserAndTaType.map {
+          future =>
+            future.map {
+              grouped => //(userId, (taType, Seq[Achs]))
+                evalForOneUser(map.get(grouped._1).get, grouped._2)
+            }
         }
-      }
     }
 
   }
@@ -247,5 +260,4 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
         }
     }.flatMap(identity)
   }
-
 }

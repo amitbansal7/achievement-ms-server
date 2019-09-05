@@ -1,5 +1,6 @@
 package com.amitbansal.ams.services
 
+import cats.data.OptionT
 import com.amitbansal.ams.Application
 import com.amitbansal.ams.models.User
 import com.amitbansal.ams.repositories.UserRepository
@@ -7,7 +8,7 @@ import com.amitbansal7.ams.models.Achievement
 import com.amitbansal7.ams.services.AchievementService.AchievementServiceResponse
 import com.amitbansal7.ams.services.{ AchievementService, JwtService }
 import org.mongodb.scala.bson.ObjectId
-
+import cats.implicits._
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, Future }
 import scala.util.{ Failure, Success }
@@ -70,11 +71,9 @@ class UserService(userRepository: UserRepository, jwtService: JwtService) {
   }
 
   def isUserValid(token: String): Future[Option[UserData]] = {
-    val userF = getUserFromToken(token)
-    userF.map {
-      case Some(user) => Some(UserData(user._id, user.email, user.firstName, user.lastName, user.department, user.shift, user.designation))
-      case None => None
-    }
+    OptionT(getUserFromToken(token)).map { user =>
+      Some(UserData(user._id, user.email, user.firstName, user.lastName, user.department, user.shift, user.designation))
+    }.getOrElse(None)
   }
 
   def getUserFromToken(token: String): Future[Option[User]] =
@@ -82,10 +81,9 @@ class UserService(userRepository: UserRepository, jwtService: JwtService) {
       case Success(value) =>
         JSON.parseFull(value._2) match {
           case Some(map: Map[String, String]) =>
-            map.get("user") match {
-              case Some(email) => userRepository.getByEmail(email).map(u => Some(u))
-              case _ => Future(None)
-            }
+            map.get("user").map { email =>
+              userRepository.getByEmail(email).map(u => Some(u))
+            }.getOrElse(Future(None))
         }
       case _ => Future(None)
     }

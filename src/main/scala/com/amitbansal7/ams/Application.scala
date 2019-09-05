@@ -27,9 +27,9 @@ object Application extends CORSHandler {
 
   val json = JSON.parseFull(
     scala.io.Source.fromResource("data.json")
-      .getLines()
-      .toList
-      .mkString
+    .getLines()
+    .toList
+    .mkString
   )
 
   val resource = json.map {
@@ -65,10 +65,10 @@ object Application extends CORSHandler {
       case Failure(e) => println(s"could not start application: {}", e.getMessage)
     }
 
-//    StdIn.readLine()
-//    bindingFuture.flatMap(_.unbind())
-//    system.terminate()
-//    println("Server is closed.")
+    StdIn.readLine()
+    bindingFuture.flatMap(_.unbind())
+    system.terminate()
+    println("Server is closed.")
 
   }
 }

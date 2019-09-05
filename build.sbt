@@ -3,6 +3,9 @@ lazy val akkaVersion = "2.5.11"
 
 enablePlugins(JavaAppPackaging)
 
+scalacOptions += "-Ypartial-unification"
+
+
 lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
@@ -28,6 +31,7 @@ lazy val root = (project in file(".")).
       "com.softwaremill.macwire" %% "macros" % "2.3.1" % "provided",
       "com.softwaremill.macwire" %% "macrosakka" % "2.3.1" % "provided",
       "com.softwaremill.macwire" %% "util" % "2.3.1",
-      "com.softwaremill.macwire" %% "proxy" % "2.3.1"
+      "com.softwaremill.macwire" %% "proxy" % "2.3.1",
+      "org.typelevel" %% "cats-core" % "2.0.0-RC1"
     )
 )

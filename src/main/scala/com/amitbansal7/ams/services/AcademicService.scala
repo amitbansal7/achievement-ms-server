@@ -5,17 +5,21 @@ import com.amitbansal.ams.services.UserService
 import com.amitbansal7.ams.models.Academic
 import com.amitbansal7.ams.repositories.AcademicRepository
 import org.mongodb.scala.bson.ObjectId
-
+import cats.data.OptionT
+import cats.instances.future._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object AcademicService {
+
   case class AcademicServiceResponse(bool: Boolean, message: String)
+
 }
 
 class AcademicService(academicRepository: AcademicRepository, userService: UserService, utils: Utils) {
 
   import AcademicService._
+
   def add(rollNo: String, name: String, batch: String, programme: String, category: String, token: String): Future[AcademicServiceResponse] = {
 
     if (!Academic.programmes.contains(programme))
@@ -28,12 +32,11 @@ class AcademicService(academicRepository: AcademicRepository, userService: UserS
 
     val user: Future[Option[User]] = userService.getUserFromToken(token)
 
-    user.map {
-      case Some(_) =>
-        academicRepository.add(Academic(rollNo, name, batch, programme, category))
-        AcademicServiceResponse(true, "Record successfully added.")
-      case None =>
-        AcademicServiceResponse(false, "Access denied.")
+    OptionT(user).map { _ =>
+      academicRepository.add(Academic(rollNo, name, batch, programme, category))
+      AcademicServiceResponse(true, "Record successfully added.")
+    }.getOrElse {
+      AcademicServiceResponse(false, "Access denied.")
     }
   }
 
@@ -52,12 +55,11 @@ class AcademicService(academicRepository: AcademicRepository, userService: UserS
 
     val user: Future[Option[User]] = userService.getUserFromToken(token)
 
-    user.map {
-      case Some(_) =>
-        academicRepository.update(objId.get, rollNo, name, batch, programme, category)
-        AcademicServiceResponse(true, "Record successfully edited.")
-      case None =>
-        AcademicServiceResponse(false, "Access denied.")
+    OptionT(user).map { _ =>
+      academicRepository.update(objId.get, rollNo, name, batch, programme, category)
+      AcademicServiceResponse(true, "Record successfully edited.")
+    }.getOrElse {
+      AcademicServiceResponse(false, "Access denied.")
     }
   }
 
@@ -80,12 +82,11 @@ class AcademicService(academicRepository: AcademicRepository, userService: UserS
 
     val user: Future[Option[User]] = userService.getUserFromToken(token)
 
-    user.map {
-      case Some(_) =>
-        academicRepository.delete(objId.get)
-        AcademicServiceResponse(true, "Successfully deleted")
-      case _ =>
-        AcademicServiceResponse(false, "Access denied.")
+    OptionT(user).map { _ =>
+      academicRepository.delete(objId.get)
+      AcademicServiceResponse(true, "Successfully deleted")
+    }.getOrElse {
+      AcademicServiceResponse(false, "Access denied.")
     }
   }
 
