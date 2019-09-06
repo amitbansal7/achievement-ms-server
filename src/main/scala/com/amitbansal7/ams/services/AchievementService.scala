@@ -6,9 +6,9 @@ import com.amitbansal7.ams.models.Achievement
 import com.amitbansal7.ams.repositories.AchievementRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
-import java.io.{File, FileInputStream, InputStream}
+import java.io.{ File, FileInputStream, InputStream }
 import java.nio.file.Files
 
 import akka.http.scaladsl.server.directives.FileInfo
@@ -17,14 +17,14 @@ import com.amitbansal.ams.repositories.UserRepository
 import com.amitbansal.ams.services.UserService
 import com.amitbansal7.ams.services.AchievementService.AchievementServiceResponseToken
 import org.mongodb.scala.bson.ObjectId
-import pdi.jwt.{Jwt, JwtAlgorithm}
+import pdi.jwt.{ Jwt, JwtAlgorithm }
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
 import cats.data.OptionT
 import cats.instances.future._
 import scala.util.parsing.json.JSON
-import scala.util.{Failure, Random, Success}
+import scala.util.{ Failure, Random, Success }
 
 object AchievementService {
 

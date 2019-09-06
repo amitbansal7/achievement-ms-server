@@ -100,20 +100,18 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
         TAchievementServiceResponse(false, "Invalid Type")
       }
     else {
-      userService.getUserFromToken(token).map {
-        case Some(user) =>
-          checkIfTAchBelongsToThisUser(tAchFromId, user) map {
-            case true =>
-              tAchievementRepository.update(objId.get, TAchievement(user._id, taType, subType, international, topic, published, sponsored, reviewed, date, description, msi, place))
-              TAchievementServiceResponse(true, "Successfully updated.")
-            case false =>
-              TAchievementServiceResponse(false, "Access Denied")
-          }
-        case None => Future {
-          TAchievementServiceResponse(false, "Access Denied")
+      OptionT(userService.getUserFromToken(token)).map { user =>
+        checkIfTAchBelongsToThisUser(tAchFromId, user) map {
+          case true =>
+            tAchievementRepository.update(objId.get, TAchievement(user._id, taType, subType, international, topic, published, sponsored, reviewed, date, description, msi, place))
+            TAchievementServiceResponse(true, "Successfully updated.")
+          case false =>
+            TAchievementServiceResponse(false, "Access Denied")
         }
-      }
-    }.flatMap(identity)
+      }.getOrElse {
+        Future(TAchievementServiceResponse(false, "Access Denied"))
+      }.flatMap(identity)
+    }
   }
 
   def getAllForUserId(userId: String): Future[TAchievementServiceData] = {
@@ -186,7 +184,7 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
       all => all.filter(_.achievements.size > 0)
     }
 
-    return allUsersWithAtleastOneAch
+    allUsersWithAtleastOneAch
   }
 
   def getAllAggregated(fromDate: Option[String], toDate: Option[String]) = {
@@ -246,18 +244,17 @@ class TAchievementService(tAchievementRepository: TAchievementRepository, userSe
 
     val tAchById = tAchievementRepository.getOneById(objId.get)
 
-    userFromToken.map {
-      case Some(user) => checkIfTAchBelongsToThisUser(tAchById, user) map {
+    OptionT(userFromToken).map { user =>
+      checkIfTAchBelongsToThisUser(tAchById, user) map {
         case true =>
           tAchievementRepository.deleteOne(objId.get)
           TAchievementServiceResponse(true, "Deletion Successful")
         case false =>
           TAchievementServiceResponse(false, "Access Denied")
       }
-      case None =>
-        Future {
-          TAchievementServiceResponse(false, "Access Denied")
-        }
+    }.getOrElse {
+      Future(TAchievementServiceResponse(false, "Access Denied"))
     }.flatMap(identity)
+
   }
 }
