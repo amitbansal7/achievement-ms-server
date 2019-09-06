@@ -4,6 +4,7 @@
  * Scala
  * akka-http
  * MongoDB
+ * [Cats](https://typelevel.org/cats/)
 
 ## Getting Started
 1. Install JDK 1.8
