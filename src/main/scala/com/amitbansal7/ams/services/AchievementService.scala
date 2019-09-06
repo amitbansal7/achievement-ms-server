@@ -6,9 +6,9 @@ import com.amitbansal7.ams.models.Achievement
 import com.amitbansal7.ams.repositories.AchievementRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-import java.io.{ File, FileInputStream, InputStream }
+import java.io.{File, FileInputStream, InputStream}
 import java.nio.file.Files
 
 import akka.http.scaladsl.server.directives.FileInfo
@@ -17,14 +17,14 @@ import com.amitbansal.ams.repositories.UserRepository
 import com.amitbansal.ams.services.UserService
 import com.amitbansal7.ams.services.AchievementService.AchievementServiceResponseToken
 import org.mongodb.scala.bson.ObjectId
-import pdi.jwt.{ Jwt, JwtAlgorithm }
+import pdi.jwt.{Jwt, JwtAlgorithm}
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
 import cats.data.OptionT
 import cats.instances.future._
 import scala.util.parsing.json.JSON
-import scala.util.{ Failure, Random, Success }
+import scala.util.{Failure, Random, Success}
 
 object AchievementService {
 
@@ -115,19 +115,20 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
     val ach: Future[Achievement] = achievementRepository.findById(objId.get)
     val user: Future[Option[User]] = userService.getUserFromToken(token)
 
-    user.map {
-      case Some(u) =>
-        ach.map(a =>
-          if (a.isInstanceOf[Achievement] && a.department == u.department && u.shift == a.shift) {
-            if (action)
-              achievementRepository.approveByUser(objId.get, u._id.toHexString)
-            else achievementRepository.approve(objId.get, action)
+    OptionT(user).map { u =>
+      ach.map { a =>
+        if (a.isInstanceOf[Achievement] && a.department == u.department && u.shift == a.shift) {
+          if (action)
+            achievementRepository.approveByUser(objId.get, u._id.toHexString)
+          else achievementRepository.approve(objId.get, action)
 
-            AchievementServiceResponse(true, "Done")
-          } else {
-            AchievementServiceResponse(false, "Access denied")
-          })
-      case _ => Future(AchievementServiceResponse(false, "No user found"))
+          AchievementServiceResponse(true, "Done")
+        } else {
+          AchievementServiceResponse(false, "Access denied")
+        }
+      }
+    }.getOrElse {
+      Future(AchievementServiceResponse(false, "No user found"))
     }.flatMap(identity)
   }
 
@@ -147,18 +148,18 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
     val user: Future[Option[User]] = userService.getUserFromToken(token)
     val ach: Future[Achievement] = achievementRepository.findById(objId.get)
 
-    user.map {
-      case Some(u) =>
-        ach.map(a =>
-          if (a.isInstanceOf[Achievement] && a.department == u.department && a.shift == u.shift) {
-            achievementRepository.deleteOne(objId.get)
-            AchievementServiceResponse(true, "Done")
-          } else {
-            AchievementServiceResponse(false, "Access denied")
-          })
-      case _ => Future(AchievementServiceResponse(false, "No user found"))
+    OptionT(user).map { u =>
+      ach.map { a =>
+        if (a.isInstanceOf[Achievement] && a.department == u.department && a.shift == u.shift) {
+          achievementRepository.deleteOne(objId.get)
+          AchievementServiceResponse(true, "Done")
+        } else {
+          AchievementServiceResponse(false, "Access denied")
+        }
+      }
+    }.getOrElse {
+      Future(AchievementServiceResponse(false, "No user found"))
     }.flatMap(identity)
-
   }
 
   def getOne(id: String): Option[Future[Achievement]] = {
@@ -171,9 +172,7 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
             if (u != null) Achievement.apply(a, Some(u.email))
             else Achievement.apply(a, None)
           }
-        case a: Achievement => Future {
-          a
-        }
+        case a: Achievement => Future(a)
       }.flatMap(identity)
       Some(res)
     }.getOrElse(None)
@@ -192,7 +191,7 @@ class AchievementService(userService: UserService, achievementRepository: Achiev
     category: Option[String],
     offset: Option[Int],
     limit: Option[Int]
-  ) = {
+  ): Future[Future[AchievementServiceResponseToken]] = {
     OptionT(userService.getUserFromToken(token)).map { user =>
       val data = achievementRepository
         .findAllByUnApprovedDepartmentAndDepartment(user.department, user.shift)
